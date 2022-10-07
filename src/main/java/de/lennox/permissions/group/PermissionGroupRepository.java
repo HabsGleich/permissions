@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.result.PermissionGroupResult;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Duration;
 import java.util.List;
@@ -24,6 +25,8 @@ import java.util.logging.Logger;
 public class PermissionGroupRepository {
   private final Cache<String, PermissionGroupResult> cachedGroups =
       CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(15)).build();
+
+  @Setter private PermissionGroupResult defaultGroup;
 
   /**
    * Builds an initial cache with all currently in-database persistent permission groups
@@ -48,8 +51,13 @@ public class PermissionGroupRepository {
 
               List<PermissionGroupResult> groups = optionalGroups.get();
               for (PermissionGroupResult group : groups) {
+                if (group.isDefaultGroup()) {
+                  defaultGroup = group;
+                }
+
                 cachedGroups.put(group.getName(), group);
               }
+
               logger.log(Level.INFO, "Cached " + groups.size() + " group(s) on start-up!");
             });
   }
@@ -85,6 +93,17 @@ public class PermissionGroupRepository {
               });
     }
     return groupFuture;
+  }
+
+  /**
+   * Returns the default group which is set internally, the option will be empty if no default group
+   * was found or set
+   *
+   * @return The optional default group
+   * @since 1.0.0
+   */
+  public Optional<PermissionGroupResult> getDefaultGroup() {
+    return Optional.ofNullable(defaultGroup);
   }
 
   /**

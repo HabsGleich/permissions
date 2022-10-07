@@ -10,6 +10,7 @@ import java.util.List;
 public class PermissionGroupResult {
   private final String name;
   private String prefix;
+  private boolean defaultGroup;
   private final List<String> allowedPermissions;
   private final List<String> deniedPermissions;
 }

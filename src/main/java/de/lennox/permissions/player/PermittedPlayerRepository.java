@@ -45,7 +45,7 @@ public class PermittedPlayerRepository {
                   PermittedPlayerResult player =
                       PlayerPermissionPlugin.getSingleton()
                           .getPermissionDriver()
-                          .createPermittedUser(uuid)
+                          .createPermittedPlayer(uuid)
                           .join();
                   playerFuture.complete(player);
                   return;

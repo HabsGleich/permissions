@@ -2,6 +2,7 @@ package de.lennox.permissions.listener;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.result.PermissionGroupResult;
+import de.lennox.permissions.group.PermissionGroupRepository;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -33,14 +34,21 @@ public class PlayerStateListener implements Listener {
 
     Player player = event.getPlayer();
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    PermissionGroupRepository groups = permissions.getGroupRepository();
+
     permissions
         .getPlayerRepository()
         .getPermittedPlayer(player.getUniqueId())
         .whenCompleteAsync(
             (permittedPlayer, t) -> {
-              // Can be done blocking as whenCompleteAsync is already executing asynchronously
+              String playerRankName = permittedPlayer.getRank();
+              boolean useDefaultRank = playerRankName.isEmpty();
+              // Use default rank if player rank is empty
               Optional<PermissionGroupResult> playerRank =
-                  permissions.getGroupRepository().getGroup(permittedPlayer.getRank()).join();
+                  useDefaultRank
+                      ? groups.getDefaultGroup()
+                      : groups.getGroup(playerRankName).join();
+
               // Send normal join message if player has no rank or prefix
               if (playerRank.isEmpty() || playerRank.get().getPrefix().isEmpty()) {
                 Bukkit.broadcast(
@@ -49,7 +57,6 @@ public class PlayerStateListener implements Listener {
                         NamedTextColor.YELLOW));
                 return;
               }
-
               Bukkit.broadcast(
                   Component.text(
                       String.format(

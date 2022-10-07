@@ -281,6 +281,7 @@ public class PermsCommand extends Command {
                         }
 
                         permissions.getPermissionDriver().makeGroupDefault(groupName);
+                        permissions.getGroupRepository().setDefaultGroup(optionalGroup.get());
                         sender.sendMessage("permissions.command.perms.prefix.success");
                       });
               return 1;
@@ -448,6 +449,7 @@ public class PermsCommand extends Command {
     String groupName = context.getArgument("name", String.class);
     String permission = context.getArgument("permission", String.class);
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    PermissionDriver driver = permissions.getPermissionDriver();
 
     permissions
         .getGroupRepository()
@@ -461,7 +463,6 @@ public class PermsCommand extends Command {
               }
 
               PermissionGroupResult group = optionalGroup.get();
-              PermissionDriver driver = permissions.getPermissionDriver();
               List<String> list =
                   denied ? group.getDeniedPermissions() : group.getAllowedPermissions();
               if (add) {

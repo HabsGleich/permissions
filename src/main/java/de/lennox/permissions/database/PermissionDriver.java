@@ -107,6 +107,7 @@ public class PermissionDriver {
             while (result.next()) {
               String groupName = result.getString("name");
               String prefix = result.getString("prefix");
+              boolean defaultGroup = result.getBoolean("default");
 
               Optional<Tuple<List<String>, List<String>>> optionalPermissions =
                   queryGroupPermissions(groupName).join();
@@ -114,14 +115,14 @@ public class PermissionDriver {
               if (optionalPermissions.isEmpty()) {
                 groups.add(
                     new PermissionGroupResult(
-                        groupName, prefix, new ArrayList<>(), new ArrayList<>()));
+                        groupName, prefix, defaultGroup, new ArrayList<>(), new ArrayList<>()));
                 return;
               }
 
               Tuple<List<String>, List<String>> permissions = optionalPermissions.get();
               groups.add(
                   new PermissionGroupResult(
-                      groupName, prefix, permissions.getA(), permissions.getB()));
+                      groupName, prefix, defaultGroup, permissions.getA(), permissions.getB()));
             }
             groupListFuture.complete(Optional.of(groups));
           } catch (SQLException e) {
@@ -164,6 +165,7 @@ public class PermissionDriver {
               return;
             }
             String prefix = result.getString("prefix");
+            boolean defaultGroup = result.getBoolean("default");
 
             queryGroupPermissions(name)
                 .whenComplete(
@@ -173,7 +175,11 @@ public class PermissionDriver {
                         groupFuture.complete(
                             Optional.of(
                                 new PermissionGroupResult(
-                                    name, prefix, new ArrayList<>(), new ArrayList<>())));
+                                    name,
+                                    prefix,
+                                    defaultGroup,
+                                    new ArrayList<>(),
+                                    new ArrayList<>())));
                         return;
                       }
 
@@ -181,7 +187,11 @@ public class PermissionDriver {
                       groupFuture.complete(
                           Optional.of(
                               new PermissionGroupResult(
-                                  name, prefix, permissions.getA(), permissions.getB())));
+                                  name,
+                                  prefix,
+                                  defaultGroup,
+                                  permissions.getA(),
+                                  permissions.getB())));
                     });
           } catch (SQLException e) {
             System.err.println(
@@ -248,54 +258,6 @@ public class PermissionDriver {
           }
         });
     return permissionFuture;
-  }
-
-  /**
-   * Queries the default from the database
-   *
-   * @return The future optional default permission group
-   * @since 1.0.0
-   */
-  public CompletableFuture<Optional<PermissionGroupResult>> queryDefaultGroup() {
-    CompletableFuture<Optional<PermissionGroupResult>> groupFuture = new CompletableFuture<>();
-    databaseThreadPool.execute(
-        () -> {
-          try {
-            Optional<ResultSet> optionalResult =
-                StatementBuilder.forConnection(connection())
-                    .withSql("SELECT * FROM permission_groups WHERE \"default\" = true")
-                    .executeQuery();
-            // Complete with empty group if query didn't succeed
-            if (optionalResult.isEmpty()) {
-              groupFuture.complete(Optional.empty());
-            }
-
-            //noinspection OptionalGetWithoutIsPresent
-            ResultSet result = optionalResult.get();
-            // Complete with empty group if there is no default group
-            if (!result.next()) {
-              groupFuture.complete(Optional.empty());
-              return;
-            }
-
-            String groupName = result.getString("name");
-            queryGroupByName(groupName)
-                .whenComplete(
-                    (optionalGroup, t) -> {
-                      if (optionalGroup.isEmpty()) {
-                        groupFuture.complete(Optional.empty());
-                      }
-                      //noinspection OptionalGetWithoutIsPresent
-                      groupFuture.complete(Optional.of(optionalGroup.get()));
-                    });
-          } catch (SQLException e) {
-            System.err.println(
-                "Failed to read query result! For precise details read stacktrace below.");
-            e.printStackTrace();
-            groupFuture.complete(Optional.empty());
-          }
-        });
-    return groupFuture;
   }
 
   /**
@@ -406,23 +368,17 @@ public class PermissionDriver {
    * @return The completable created player
    * @since 1.0.0
    */
-  public CompletableFuture<PermittedPlayerResult> createPermittedUser(UUID uuid) {
+  public CompletableFuture<PermittedPlayerResult> createPermittedPlayer(UUID uuid) {
     CompletableFuture<PermittedPlayerResult> playerFuture = new CompletableFuture<>();
     databaseThreadPool.execute(
-        () ->
-            queryDefaultGroup()
-                .whenComplete(
-                    (optionalGroup, t) -> {
-                      // Use empty name if default group not present
-                      String defaultGroupName =
-                          optionalGroup.isPresent() ? optionalGroup.get().getName() : "";
-                      StatementBuilder.forConnection(connection())
-                          .withSql("INSERT INTO permitted_players VALUES(?, ?, ?)")
-                          .withParameters(uuid.toString(), defaultGroupName, -1)
-                          .execute();
+        () -> {
+          StatementBuilder.forConnection(connection())
+              .withSql("INSERT INTO permitted_players VALUES(?, ?, ?)")
+              .withParameters(uuid.toString(), "", -1)
+              .execute();
 
-                      playerFuture.complete(new PermittedPlayerResult(uuid, defaultGroupName, -1));
-                    }));
+          playerFuture.complete(new PermittedPlayerResult(uuid, "", -1));
+        });
     return playerFuture;
   }
 
