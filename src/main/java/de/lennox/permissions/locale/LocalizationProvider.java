@@ -1,4 +1,4 @@
-package de.lennox.permissions.local;
+package de.lennox.permissions.locale;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,8 +12,9 @@ import java.util.ResourceBundle;
  * @author Lennox
  */
 @RequiredArgsConstructor
-public class MessageLocalization {
+public class LocalizationProvider {
   private static final String BUNDLE_KEY = "permissions";
+  private final ClassLoader loader;
   private final Locale locale;
   private ResourceBundle bundle;
 
@@ -23,7 +24,7 @@ public class MessageLocalization {
    * @since 1.0.0
    */
   public void load() {
-    this.bundle = ResourceBundle.getBundle(BUNDLE_KEY, locale);
+    this.bundle = ResourceBundle.getBundle(BUNDLE_KEY, locale, loader);
   }
 
   /**
@@ -37,24 +38,14 @@ public class MessageLocalization {
   }
 
   /**
-   * Gets a message array from the localization bundle with the given key
-   *
-   * @param key Message key
-   * @return The localized messages
-   */
-  public String[] getMessages(String key) {
-    return this.bundle.getStringArray(key);
-  }
-
-  /**
    * Creates a new message localization for the given locale
    *
    * @param locale The locale
    * @return The message localization
    */
-  public static MessageLocalization ofLocale(Locale locale) {
-    MessageLocalization localization = new MessageLocalization(locale);
-    localization.load();
-    return localization;
+  public static LocalizationProvider ofLocale(Locale locale, ClassLoader loader) {
+    LocalizationProvider provider = new LocalizationProvider(loader, locale);
+    provider.load();
+    return provider;
   }
 }

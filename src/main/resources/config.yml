@@ -1,0 +1,15 @@
+# Enter your database credentials here
+# Currently only PostgreSQL is supported
+database:
+  host: 127.0.0.1
+  database: permissions
+  username: username
+  password: password
+
+# Here you can provide all languages you want to have supported
+#
+# Keep in mind that if you want to add languages you need to visit plugins/permissions/languages
+# and implement all keys yourself.
+languages:
+  - "de"
+  - "en"

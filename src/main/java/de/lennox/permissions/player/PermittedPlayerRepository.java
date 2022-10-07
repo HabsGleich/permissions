@@ -62,7 +62,7 @@ public class PermittedPlayerRepository {
    *
    * @param uuid The uuid
    */
-  public void remove(UUID uuid) {
+  public void invalidate(UUID uuid) {
     cachedPlayers.remove(uuid);
   }
 }

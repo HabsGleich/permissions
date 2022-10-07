@@ -3,10 +3,12 @@ package de.lennox.permissions.command;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import de.lennox.permissions.PlayerPermissionPlugin;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.commands.CommandSourceStack;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -51,5 +53,21 @@ public abstract class Command {
   protected RequiredArgumentBuilder<CommandSourceStack, String> argument(
       String label, ArgumentType type) {
     return RequiredArgumentBuilder.<CommandSourceStack, String>argument(label, type);
+  }
+
+  /**
+   * Resolves a players language and returns the localized message
+   *
+   * @param player The player
+   * @param key The message key
+   * @return The localized message
+   * @since 1.0.0
+   */
+  protected String getLocalizedMessage(UUID player, String key) {
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+
+    return permissions
+        .getLocalization()
+        .getMessage(permissions.getPlayerLanguageRepository().get(player), key);
   }
 }

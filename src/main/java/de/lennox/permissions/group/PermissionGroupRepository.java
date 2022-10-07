@@ -64,7 +64,7 @@ public class PermissionGroupRepository {
 
   /**
    * Gets a group from the cache if present. If no group can be found in-cache it will be directly
-   * received from the database
+   * received from the database and added to the cache
    *
    * @param name The group name
    * @return The future optional group
@@ -122,7 +122,7 @@ public class PermissionGroupRepository {
    * @param name The group name
    * @since 1.0.0
    */
-  public void invalidateCache(String name) {
+  public void invalidate(String name) {
     cachedGroups.invalidate(name);
   }
 }

@@ -7,10 +7,13 @@ import de.lennox.permissions.command.Command;
 import de.lennox.permissions.database.PermissionDriver;
 import de.lennox.permissions.database.result.PermissionGroupResult;
 import de.lennox.permissions.database.result.PermittedPlayerResult;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,8 +37,50 @@ public class PermsCommand extends Command {
     return literal ->
         literal
             .requires(stack -> stack.getBukkitSender().hasPermission("command.perms"))
+            .then(createLanguageSubCommand())
             .then(createUserSubCommands())
             .then(createGroupSubCommands());
+  }
+
+  /**
+   * Creates the language selection sub command
+   *
+   * @return The language sub command
+   * @since 1.0.0
+   */
+  private LiteralArgumentBuilder<CommandSourceStack> createLanguageSubCommand() {
+    return literal("language")
+        .then(
+            argument("lang", string())
+                .suggests(
+                    (ctx, builder) -> {
+                      for (String language :
+                          PlayerPermissionPlugin.getSingleton()
+                              .getLocalization()
+                              .getLocaleCache()
+                              .keySet()) {
+                        builder.suggest(language);
+                      }
+                      return builder.buildFuture();
+                    })
+                .executes(
+                    context -> {
+                      CommandSender sender = context.getSource().getBukkitSender();
+                      String lang = context.getArgument("lang", String.class);
+
+                      // Only process player execution
+                      if (sender instanceof Player player) {
+                        UUID uuid = player.getUniqueId();
+                        PlayerPermissionPlugin.getSingleton()
+                            .getPlayerLanguageRepository()
+                            .store(uuid, lang);
+                        sender.sendMessage(
+                            Component.text(
+                                getLocalizedMessage(uuid, "command.perms.language.success"),
+                                NamedTextColor.AQUA));
+                      }
+                      return 1;
+                    }));
   }
 
   // region user sub commands
@@ -70,6 +115,7 @@ public class PermsCommand extends Command {
                             argument("expiresIn", greedyString())
                                 .executes(
                                     context -> {
+                                      updateUserGroup(context, System.currentTimeMillis() + 20000);
                                       return 1;
                                     }))
                         .executes(
@@ -94,32 +140,40 @@ public class PermsCommand extends Command {
     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
     UUID playerId = offlinePlayer.getUniqueId();
 
-    permissions
-        .getPermissionDriver()
-        .queryPlayerById(playerId)
-        .whenCompleteAsync(
-            (optionalPlayer, t) -> {
-              // Notify sender that the player could not be found
-              if (optionalPlayer.isEmpty()) {
-                sender.sendMessage(
-                    permissions.getLocalization().getMessage("command.perms.player_not_found"));
-                return;
-              }
+    if (sender instanceof Player player) {
+      UUID uuid = player.getUniqueId();
+      permissions
+          .getPermissionDriver()
+          .queryPlayerById(playerId)
+          .whenCompleteAsync(
+              (optionalPlayer, t) -> {
+                // Notify sender that the player could not be found
+                if (optionalPlayer.isEmpty()) {
+                  sender.sendMessage(
+                      Component.text(
+                          getLocalizedMessage(uuid, "command.perms.player_not_found"),
+                          NamedTextColor.RED));
+                  return;
+                }
 
-              permissions.getPermissionDriver().updateUserGroup(playerId, groupName, time);
-              // Update cache if player is online
-              if (offlinePlayer.isOnline()) {
-                permissions
-                    .getPlayerRepository()
-                    .getPermittedPlayer(playerId)
-                    .whenComplete(
-                        (player, throwable) -> {
-                          player.setRank(groupName);
-                          player.setExpiresAt(time);
-                        });
-              }
-              sender.sendMessage("command.perms.set_group.success");
-            });
+                permissions.getPermissionDriver().updateUserGroup(playerId, groupName, time);
+                // Update cache if player is online
+                if (offlinePlayer.isOnline()) {
+                  permissions
+                      .getPlayerRepository()
+                      .getPermittedPlayer(playerId)
+                      .whenComplete(
+                          (permittedPlayer, throwable) -> {
+                            permittedPlayer.setRank(groupName);
+                            permittedPlayer.setExpiresAt(time);
+                          });
+                }
+                sender.sendMessage(
+                    Component.text(
+                        getLocalizedMessage(uuid, "command.perms.set_group.success"),
+                        NamedTextColor.AQUA));
+              });
+    }
   }
   // endregion
 
@@ -137,26 +191,50 @@ public class PermsCommand extends Command {
               CommandSender sender = context.getSource().getBukkitSender();
               String name = context.getArgument("name", String.class);
 
-              PlayerPermissionPlugin.getSingleton()
-                  .getPermissionDriver()
-                  .queryPlayerById(Bukkit.getOfflinePlayer(name).getUniqueId())
-                  .whenCompleteAsync(
-                      (optionalPlayer, t) -> {
-                        // Notify player that the requested player could not be found
-                        if (optionalPlayer.isEmpty()) {
-                          sender.sendMessage("command.perms.player_not_found");
-                          return;
-                        }
+              if (sender instanceof Player player) {
+                UUID uuid = player.getUniqueId();
+                PlayerPermissionPlugin.getSingleton()
+                    .getPermissionDriver()
+                    .queryPlayerById(Bukkit.getOfflinePlayer(name).getUniqueId())
+                    .whenCompleteAsync(
+                        (optionalPlayer, t) -> {
+                          // Notify player that the requested player could not be found
+                          if (optionalPlayer.isEmpty()) {
+                            sender.sendMessage(
+                                Component.text(
+                                    getLocalizedMessage(uuid, "command.perms.player_not_found"),
+                                    NamedTextColor.RED));
+                            return;
+                          }
 
-                        PermittedPlayerResult player = optionalPlayer.get();
-                        sender.sendMessage(
-                            "uuid:"
-                                + player.getUuid()
-                                + ", group: "
-                                + player.getRank()
-                                + ", expiresAt: "
-                                + player.getExpiresAt());
-                      });
+                          PermittedPlayerResult permittedPlayer = optionalPlayer.get();
+                          long expirationTime = permittedPlayer.getExpiresAt();
+                          sender.sendMessage(
+                              Component.text(
+                                      String.format(
+                                              getLocalizedMessage(
+                                                  uuid, "command.perms.info.header"),
+                                              name)
+                                          + "\n",
+                                      NamedTextColor.AQUA)
+                                  .append(
+                                      Component.text(
+                                          String.format(
+                                              " - %s: %s\n",
+                                              getLocalizedMessage(uuid, "group"),
+                                              permittedPlayer.getRank()),
+                                          NamedTextColor.GRAY))
+                                  .append(
+                                      Component.text(
+                                          String.format(
+                                              " - %s: %s",
+                                              getLocalizedMessage(uuid, "expires_at"),
+                                              expirationTime == -1
+                                                  ? "NEVER"
+                                                  : permittedPlayer.parseExpiryDate()),
+                                          NamedTextColor.GRAY)));
+                        });
+              }
 
               return 1;
             });
@@ -213,14 +291,23 @@ public class PermsCommand extends Command {
               CommandSender sender = context.getSource().getBukkitSender();
               String groupName = context.getArgument("name", String.class);
 
-              // Notify player that group is already existing
-              if (permissions.getGroupRepository().hasGroup(groupName)) {
-                sender.sendMessage("command.perms.already_exists");
-                return 1;
-              }
+              if (sender instanceof Player player) {
+                UUID uuid = player.getUniqueId();
+                // Notify player that group is already existing
+                if (permissions.getGroupRepository().hasGroup(groupName)) {
+                  sender.sendMessage(
+                      Component.text(
+                          getLocalizedMessage(uuid, "command.perms.already_exists"),
+                          NamedTextColor.RED));
+                  return 1;
+                }
 
-              permissions.getPermissionDriver().createGroup(groupName);
-              sender.sendMessage("command.perms.create.success");
+                permissions.getPermissionDriver().createGroup(groupName);
+                sender.sendMessage(
+                    Component.text(
+                        getLocalizedMessage(uuid, "command.perms.create.success"),
+                        NamedTextColor.AQUA));
+              }
               return 1;
             });
   }
@@ -241,15 +328,25 @@ public class PermsCommand extends Command {
               CommandSender sender = context.getSource().getBukkitSender();
               String groupName = context.getArgument("name", String.class);
 
-              // Notify player that group is not existing
-              if (!permissions.getGroupRepository().hasGroup(groupName)) {
-                sender.sendMessage("command.perms.group_not_found");
-                return 1;
-              }
+              if (sender instanceof Player player) {
+                UUID uuid = player.getUniqueId();
+                // Notify player that group is not existing
+                if (!permissions.getGroupRepository().hasGroup(groupName)) {
+                  sender.sendMessage("command.perms.group_not_found");
+                  sender.sendMessage(
+                      Component.text(
+                          getLocalizedMessage(uuid, "command.perms.group_not_found"),
+                          NamedTextColor.RED));
+                  return 1;
+                }
 
-              permissions.getPermissionDriver().deleteGroup(groupName);
-              permissions.getGroupRepository().invalidateCache(groupName);
-              sender.sendMessage("command.perms.delete.success");
+                permissions.getPermissionDriver().deleteGroup(groupName);
+                permissions.getGroupRepository().invalidate(groupName);
+                sender.sendMessage(
+                    Component.text(
+                        getLocalizedMessage(uuid, "command.perms.delete.success"),
+                        NamedTextColor.AQUA));
+              }
               return 1;
             });
   }
@@ -270,21 +367,30 @@ public class PermsCommand extends Command {
               CommandSender sender = context.getSource().getBukkitSender();
               String groupName = context.getArgument("name", String.class);
 
-              permissions
-                  .getGroupRepository()
-                  .getGroup(groupName)
-                  .whenCompleteAsync(
-                      (optionalGroup, t) -> {
-                        // Notify player that group is not existing
-                        if (optionalGroup.isEmpty()) {
-                          sender.sendMessage("command.perms.group_not_found");
-                          return;
-                        }
+              if (sender instanceof Player player) {
+                UUID uuid = player.getUniqueId();
+                permissions
+                    .getGroupRepository()
+                    .getGroup(groupName)
+                    .whenCompleteAsync(
+                        (optionalGroup, t) -> {
+                          // Notify player that group is not existing
+                          if (optionalGroup.isEmpty()) {
+                            sender.sendMessage(
+                                Component.text(
+                                    getLocalizedMessage(uuid, "command.perms.group_not_found"),
+                                    NamedTextColor.RED));
+                            return;
+                          }
 
-                        permissions.getPermissionDriver().makeGroupDefault(groupName);
-                        permissions.getGroupRepository().setDefaultGroup(optionalGroup.get());
-                        sender.sendMessage("command.perms.default.success");
-                      });
+                          permissions.getPermissionDriver().makeGroupDefault(groupName);
+                          permissions.getGroupRepository().setDefaultGroup(optionalGroup.get());
+                          sender.sendMessage(
+                              Component.text(
+                                  getLocalizedMessage(uuid, "command.perms.default.success"),
+                                  NamedTextColor.AQUA));
+                        });
+              }
               return 1;
             });
   }
@@ -308,24 +414,34 @@ public class PermsCommand extends Command {
                       String groupName = context.getArgument("name", String.class);
                       String prefix = context.getArgument("prefix", String.class);
 
-                      permissions
-                          .getGroupRepository()
-                          .getGroup(groupName)
-                          .whenCompleteAsync(
-                              (optionalGroup, t) -> {
-                                // Notify player that group is not existing
-                                if (optionalGroup.isEmpty()) {
-                                  sender.sendMessage("command.perms.group_not_found");
-                                  return;
-                                }
+                      if (sender instanceof Player player) {
+                        UUID uuid = player.getUniqueId();
+                        permissions
+                            .getGroupRepository()
+                            .getGroup(groupName)
+                            .whenCompleteAsync(
+                                (optionalGroup, t) -> {
+                                  // Notify player that group is not existing
+                                  if (optionalGroup.isEmpty()) {
+                                    sender.sendMessage(
+                                        Component.text(
+                                            getLocalizedMessage(
+                                                uuid, "command.perms.group_not_found"),
+                                            NamedTextColor.AQUA));
+                                    return;
+                                  }
 
-                                PermissionGroupResult group = optionalGroup.get();
-                                permissions
-                                    .getPermissionDriver()
-                                    .updateGroupPrefix(groupName, prefix);
-                                group.setPrefix(prefix);
-                                sender.sendMessage("command.perms.prefix.success");
-                              });
+                                  PermissionGroupResult group = optionalGroup.get();
+                                  permissions
+                                      .getPermissionDriver()
+                                      .updateGroupPrefix(groupName, prefix);
+                                  group.setPrefix(prefix);
+                                  sender.sendMessage(
+                                      Component.text(
+                                          getLocalizedMessage(uuid, "command.perms.prefix.success"),
+                                          NamedTextColor.AQUA));
+                                });
+                      }
                       return 1;
                     }));
   }
@@ -345,21 +461,47 @@ public class PermsCommand extends Command {
               CommandSender sender = context.getSource().getBukkitSender();
               String groupName = context.getArgument("name", String.class);
 
-              PlayerPermissionPlugin.getSingleton()
-                  .getGroupRepository()
-                  .getGroup(groupName)
-                  .whenCompleteAsync(
-                      (optionalGroup, t) -> {
-                        // Notify player that group is not existing
-                        if (optionalGroup.isEmpty()) {
-                          sender.sendMessage("command.perms.group_not_found");
-                          return;
-                        }
+              if (sender instanceof Player player) {
+                UUID uuid = player.getUniqueId();
+                PlayerPermissionPlugin.getSingleton()
+                    .getGroupRepository()
+                    .getGroup(groupName)
+                    .whenCompleteAsync(
+                        (optionalGroup, t) -> {
+                          // Notify player that group is not existing
+                          if (optionalGroup.isEmpty()) {
+                            sender.sendMessage(
+                                Component.text(
+                                    getLocalizedMessage(uuid, "command.perms.group_not_found"),
+                                    NamedTextColor.RED));
+                            return;
+                          }
 
-                        PermissionGroupResult group = optionalGroup.get();
-                        sender.sendMessage(
-                            "name: " + group.getName() + " prefix: " + group.getPrefix());
-                      });
+                          PermissionGroupResult group = optionalGroup.get();
+                          sender.sendMessage(
+                              Component.text(
+                                      String.format(
+                                              getLocalizedMessage(
+                                                  uuid, "command.perms.group.header"),
+                                              group.getName())
+                                          + "\n",
+                                      NamedTextColor.AQUA)
+                                  .append(
+                                      Component.text(
+                                          String.format(
+                                              " - %s: %s\n",
+                                              getLocalizedMessage(uuid, "prefix"),
+                                              group.getPrefix()),
+                                          NamedTextColor.GRAY))
+                                  .append(
+                                      Component.text(
+                                          String.format(
+                                              " - %s: %s",
+                                              getLocalizedMessage(uuid, "default"),
+                                              group.isDefaultGroup()),
+                                          NamedTextColor.GRAY)));
+                        });
+              }
               return 1;
             });
   }
@@ -452,29 +594,38 @@ public class PermsCommand extends Command {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     PermissionDriver driver = permissions.getPermissionDriver();
 
-    permissions
-        .getGroupRepository()
-        .getGroup(groupName)
-        .whenCompleteAsync(
-            (optionalGroup, t) -> {
-              // Notify player that group is not existing
-              if (optionalGroup.isEmpty()) {
-                sender.sendMessage("command.perms.group_not_found");
-                return;
-              }
+    if (sender instanceof Player player) {
+      UUID uuid = player.getUniqueId();
+      permissions
+          .getGroupRepository()
+          .getGroup(groupName)
+          .whenCompleteAsync(
+              (optionalGroup, t) -> {
+                // Notify player that group is not existing
+                if (optionalGroup.isEmpty()) {
+                  sender.sendMessage(
+                      Component.text(
+                          getLocalizedMessage(uuid, "command.perms.group_not_found"),
+                          NamedTextColor.RED));
+                  return;
+                }
 
-              PermissionGroupResult group = optionalGroup.get();
-              List<String> list =
-                  denied ? group.getDeniedPermissions() : group.getAllowedPermissions();
-              if (add) {
-                driver.addPermissionToGroup(groupName, permission, denied);
-                list.add(permission);
-              } else {
-                driver.removePermissionFromGroup(groupName, permission, denied);
-                list.remove(permission);
-              }
-              sender.sendMessage("command.perms.change.success");
-            });
+                PermissionGroupResult group = optionalGroup.get();
+                List<String> list =
+                    denied ? group.getDeniedPermissions() : group.getAllowedPermissions();
+                if (add) {
+                  driver.addPermissionToGroup(groupName, permission, denied);
+                  list.add(permission);
+                } else {
+                  driver.removePermissionFromGroup(groupName, permission, denied);
+                  list.remove(permission);
+                }
+                sender.sendMessage(
+                    Component.text(
+                        getLocalizedMessage(uuid, "command.perms.change.success"),
+                        NamedTextColor.AQUA));
+              });
+    }
   }
   // endregion
   // endregion

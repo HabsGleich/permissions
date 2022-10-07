@@ -3,6 +3,8 @@ package de.lennox.permissions.database.result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -17,7 +19,17 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 public class PermittedPlayerResult {
+  private static final SimpleDateFormat EXPIRE_FORMATTER = new SimpleDateFormat("dd.MM.yyyy HH:mm");
   private final UUID uuid;
   private String rank;
   private long expiresAt;
+
+  /**
+   * Creates a parsed time string to display for when the rank expires
+   *
+   * @return The parsed time
+   */
+  public String parseExpiryDate() {
+    return EXPIRE_FORMATTER.format(new Date(expiresAt));
+  }
 }

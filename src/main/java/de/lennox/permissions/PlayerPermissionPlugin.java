@@ -7,23 +7,25 @@ import de.lennox.permissions.database.postgre.PostgreSqlGateway;
 import de.lennox.permissions.group.PermissionGroupRepository;
 import de.lennox.permissions.listener.PlayerChatListener;
 import de.lennox.permissions.listener.PlayerStateListener;
-import de.lennox.permissions.local.MessageLocalization;
+import de.lennox.permissions.locale.LocalizationRepository;
 import de.lennox.permissions.player.PermittedPlayerRepository;
+import de.lennox.permissions.player.PlayerLanguageRepository;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
-import java.util.Locale;
 
 @Getter
 public class PlayerPermissionPlugin extends JavaPlugin {
   @Getter private static PlayerPermissionPlugin singleton;
+  private PlayerLanguageRepository playerLanguageRepository;
   private PermittedPlayerRepository playerRepository;
   private PermissionGroupRepository groupRepository;
   private CommandRegistrar commandRegistrar;
   private PermissionDriver permissionDriver;
-  private MessageLocalization localization;
+  private LocalizationRepository localization;
 
   @Override
   public void onLoad() {
@@ -32,19 +34,22 @@ public class PlayerPermissionPlugin extends JavaPlugin {
 
   @Override
   public void onEnable() {
+    saveDefaultConfig();
     this.commandRegistrar = new CommandRegistrar(this);
+    FileConfiguration config = getConfig();
     PostgreSqlGateway postgreSqlGateway =
         new PostgreSqlGateway(
             PostgreSqlConfiguration.builder()
-                .host("127.0.0.1:5432")
-                .database("permissions")
-                .user("postgres")
-                .password("123")
+                .host(config.getString("database.host"))
+                .database(config.getString("database.database"))
+                .user(config.getString("database.username"))
+                .password(config.getString("database.password"))
                 .build());
     this.permissionDriver = new PermissionDriver(postgreSqlGateway);
     this.playerRepository = new PermittedPlayerRepository();
     this.groupRepository = new PermissionGroupRepository();
-    this.localization = MessageLocalization.ofLocale(Locale.GERMANY);
+    this.localization = new LocalizationRepository();
+    this.playerLanguageRepository = new PlayerLanguageRepository();
 
     List.of(commandRegistrar, new PlayerChatListener(), new PlayerStateListener())
         .forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
@@ -52,6 +57,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
     postgreSqlGateway.setup();
     this.commandRegistrar.setup();
     this.groupRepository.buildInitialCache();
+    this.localization.load(config);
   }
 
   @Override

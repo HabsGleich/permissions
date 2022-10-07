@@ -2,6 +2,7 @@ package de.lennox.permissions.listener;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.result.PermissionGroupResult;
+import de.lennox.permissions.database.result.PermittedPlayerResult;
 import de.lennox.permissions.group.PermissionGroupRepository;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,9 +23,18 @@ public class PlayerStateListener implements Listener {
     UUID player = event.getUniqueId();
 
     // Let the player wait until his data is loaded
-    PlayerPermissionPlugin.getSingleton().getPlayerRepository().getPermittedPlayer(player).join();
+    PermittedPlayerResult permittedPlayer =
+        PlayerPermissionPlugin.getSingleton()
+            .getPlayerRepository()
+            .getPermittedPlayer(player)
+            .join();
 
-    // TODO: Handle rank expiration
+    // Automatically assign player to default group on rank expire
+    if (permittedPlayer.getExpiresAt() != -1
+        && System.currentTimeMillis() > permittedPlayer.getExpiresAt()) {
+      PlayerPermissionPlugin.getSingleton().getPermissionDriver().updateUserGroup(player, "", -1);
+      permittedPlayer.setRank("");
+    }
   }
 
   @EventHandler
@@ -70,6 +80,6 @@ public class PlayerStateListener implements Listener {
   private void onPlayerQuit(PlayerQuitEvent event) {
     PlayerPermissionPlugin.getSingleton()
         .getPlayerRepository()
-        .remove(event.getPlayer().getUniqueId());
+        .invalidate(event.getPlayer().getUniqueId());
   }
 }
