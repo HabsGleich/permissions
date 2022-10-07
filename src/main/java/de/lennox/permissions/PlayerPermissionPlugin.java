@@ -8,6 +8,7 @@ import de.lennox.permissions.group.PermissionGroupRepository;
 import de.lennox.permissions.listener.PlayerChatListener;
 import de.lennox.permissions.listener.PlayerStateListener;
 import de.lennox.permissions.locale.LocalizationRepository;
+import de.lennox.permissions.player.AutomaticRankAssigner;
 import de.lennox.permissions.player.PermittedPlayerRepository;
 import de.lennox.permissions.player.PlayerLanguageRepository;
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
   private CommandRegistrar commandRegistrar;
   private PermissionDriver permissionDriver;
   private LocalizationRepository localization;
+  private AutomaticRankAssigner automaticRankAssigner;
 
   @Override
   public void onLoad() {
@@ -50,6 +52,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
     this.groupRepository = new PermissionGroupRepository();
     this.localization = new LocalizationRepository();
     this.playerLanguageRepository = new PlayerLanguageRepository();
+    this.automaticRankAssigner = new AutomaticRankAssigner();
 
     List.of(commandRegistrar, new PlayerChatListener(), new PlayerStateListener())
         .forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
@@ -58,6 +61,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
     this.commandRegistrar.setup();
     this.groupRepository.buildInitialCache();
     this.localization.load(config);
+    this.automaticRankAssigner.createTask();
   }
 
   @Override

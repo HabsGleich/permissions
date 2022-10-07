@@ -585,6 +585,7 @@ public class PermsCommand extends Command {
    * @param context The command execution context
    * @param denied Whether it's a denied or allowed permission
    * @param add Whether it should get added or removed
+   * @since 1.0.0
    */
   private void updateGroupPermission(
       CommandContext<CommandSourceStack> context, boolean denied, boolean add) {

@@ -28,8 +28,19 @@ public class PermittedPlayerResult {
    * Creates a parsed time string to display for when the rank expires
    *
    * @return The parsed time
+   * @since 1.0.0
    */
   public String parseExpiryDate() {
     return EXPIRE_FORMATTER.format(new Date(expiresAt));
+  }
+
+  /**
+   * Returns if the current rank is expired and should be replaced with the default group
+   *
+   * @return Rank expiry state
+   * @since 1.0.0
+   */
+  public boolean isRankExpired() {
+    return expiresAt != 1 && System.currentTimeMillis() > expiresAt;
   }
 }

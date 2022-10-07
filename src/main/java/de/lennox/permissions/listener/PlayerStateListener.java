@@ -30,10 +30,10 @@ public class PlayerStateListener implements Listener {
             .join();
 
     // Automatically assign player to default group on rank expire
-    if (permittedPlayer.getExpiresAt() != -1
-        && System.currentTimeMillis() > permittedPlayer.getExpiresAt()) {
+    if (permittedPlayer.isRankExpired()) {
       PlayerPermissionPlugin.getSingleton().getPermissionDriver().updateUserGroup(player, "", -1);
       permittedPlayer.setRank("");
+      permittedPlayer.setExpiresAt(-1);
     }
   }
 
@@ -69,9 +69,7 @@ public class PlayerStateListener implements Listener {
               }
               Bukkit.broadcast(
                   Component.text(
-                      String.format(
-                          "[%s] %s joined the game",
-                          playerRank.get().getPrefix(), player.getName()),
+                      String.format("[%s] %s", playerRank.get().getPrefix(), player.getName()),
                       NamedTextColor.YELLOW));
             });
   }
