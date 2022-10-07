@@ -47,11 +47,14 @@ public class PermittedPlayerRepository {
                           .getPermissionDriver()
                           .createPermittedPlayer(uuid)
                           .join();
+                  cachedPlayers.put(uuid, player);
                   playerFuture.complete(player);
                   return;
                 }
 
-                playerFuture.complete(optionalPlayer.get());
+                PermittedPlayerResult permittedPlayer = optionalPlayer.get();
+                cachedPlayers.put(uuid, permittedPlayer);
+                playerFuture.complete(permittedPlayer);
               });
     }
     return playerFuture;

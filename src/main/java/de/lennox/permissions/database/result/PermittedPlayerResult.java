@@ -41,6 +41,6 @@ public class PermittedPlayerResult {
    * @since 1.0.0
    */
   public boolean isRankExpired() {
-    return expiresAt != 1 && System.currentTimeMillis() > expiresAt;
+    return expiresAt != -1 && System.currentTimeMillis() > expiresAt;
   }
 }
