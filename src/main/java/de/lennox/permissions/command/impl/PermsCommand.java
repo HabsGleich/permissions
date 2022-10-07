@@ -33,7 +33,7 @@ public class PermsCommand extends Command {
   public Consumer<LiteralArgumentBuilder<CommandSourceStack>> createBrigadierLiteral() {
     return literal ->
         literal
-            .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms"))
+            .requires(stack -> stack.getBukkitSender().hasPermission("command.perms"))
             .then(createUserSubCommands())
             .then(createGroupSubCommands());
   }
@@ -101,7 +101,8 @@ public class PermsCommand extends Command {
             (optionalPlayer, t) -> {
               // Notify sender that the player could not be found
               if (optionalPlayer.isEmpty()) {
-                sender.sendMessage("permissions.command.perms.player.not_found");
+                sender.sendMessage(
+                    permissions.getLocalization().getMessage("command.perms.player_not_found"));
                 return;
               }
 
@@ -117,7 +118,7 @@ public class PermsCommand extends Command {
                           player.setExpiresAt(time);
                         });
               }
-              sender.sendMessage("permissions.command.perms.set_group.success");
+              sender.sendMessage("command.perms.set_group.success");
             });
   }
   // endregion
@@ -143,7 +144,7 @@ public class PermsCommand extends Command {
                       (optionalPlayer, t) -> {
                         // Notify player that the requested player could not be found
                         if (optionalPlayer.isEmpty()) {
-                          sender.sendMessage("permissions.command.perms.player.not_found");
+                          sender.sendMessage("command.perms.player_not_found");
                           return;
                         }
 
@@ -214,12 +215,12 @@ public class PermsCommand extends Command {
 
               // Notify player that group is already existing
               if (permissions.getGroupRepository().hasGroup(groupName)) {
-                sender.sendMessage("permissions.command.perms.already_exists");
+                sender.sendMessage("command.perms.already_exists");
                 return 1;
               }
 
               permissions.getPermissionDriver().createGroup(groupName);
-              sender.sendMessage("permissions.command.perms.create.success");
+              sender.sendMessage("command.perms.create.success");
               return 1;
             });
   }
@@ -242,13 +243,13 @@ public class PermsCommand extends Command {
 
               // Notify player that group is not existing
               if (!permissions.getGroupRepository().hasGroup(groupName)) {
-                sender.sendMessage("permissions.command.perms.group_not_found");
+                sender.sendMessage("command.perms.group_not_found");
                 return 1;
               }
 
               permissions.getPermissionDriver().deleteGroup(groupName);
               permissions.getGroupRepository().invalidateCache(groupName);
-              sender.sendMessage("permissions.command.perms.delete.success");
+              sender.sendMessage("command.perms.delete.success");
               return 1;
             });
   }
@@ -276,13 +277,13 @@ public class PermsCommand extends Command {
                       (optionalGroup, t) -> {
                         // Notify player that group is not existing
                         if (optionalGroup.isEmpty()) {
-                          sender.sendMessage("permissions.command.perms.group_not_found");
+                          sender.sendMessage("command.perms.group_not_found");
                           return;
                         }
 
                         permissions.getPermissionDriver().makeGroupDefault(groupName);
                         permissions.getGroupRepository().setDefaultGroup(optionalGroup.get());
-                        sender.sendMessage("permissions.command.perms.prefix.success");
+                        sender.sendMessage("command.perms.default.success");
                       });
               return 1;
             });
@@ -314,7 +315,7 @@ public class PermsCommand extends Command {
                               (optionalGroup, t) -> {
                                 // Notify player that group is not existing
                                 if (optionalGroup.isEmpty()) {
-                                  sender.sendMessage("permissions.command.perms.group_not_found");
+                                  sender.sendMessage("command.perms.group_not_found");
                                   return;
                                 }
 
@@ -323,7 +324,7 @@ public class PermsCommand extends Command {
                                     .getPermissionDriver()
                                     .updateGroupPrefix(groupName, prefix);
                                 group.setPrefix(prefix);
-                                sender.sendMessage("permissions.command.perms.prefix.success");
+                                sender.sendMessage("command.perms.prefix.success");
                               });
                       return 1;
                     }));
@@ -351,7 +352,7 @@ public class PermsCommand extends Command {
                       (optionalGroup, t) -> {
                         // Notify player that group is not existing
                         if (optionalGroup.isEmpty()) {
-                          sender.sendMessage("permissions.command.perms.group_not_found");
+                          sender.sendMessage("command.perms.group_not_found");
                           return;
                         }
 
@@ -458,7 +459,7 @@ public class PermsCommand extends Command {
             (optionalGroup, t) -> {
               // Notify player that group is not existing
               if (optionalGroup.isEmpty()) {
-                sender.sendMessage("permissions.command.perms.group_not_found");
+                sender.sendMessage("command.perms.group_not_found");
                 return;
               }
 
@@ -472,7 +473,7 @@ public class PermsCommand extends Command {
                 driver.removePermissionFromGroup(groupName, permission, denied);
                 list.remove(permission);
               }
-              sender.sendMessage("permission.command.perms.change.success");
+              sender.sendMessage("command.perms.change.success");
             });
   }
   // endregion

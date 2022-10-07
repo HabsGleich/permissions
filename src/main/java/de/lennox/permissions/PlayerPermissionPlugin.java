@@ -7,12 +7,14 @@ import de.lennox.permissions.database.postgre.PostgreSqlGateway;
 import de.lennox.permissions.group.PermissionGroupRepository;
 import de.lennox.permissions.listener.PlayerChatListener;
 import de.lennox.permissions.listener.PlayerStateListener;
+import de.lennox.permissions.local.MessageLocalization;
 import de.lennox.permissions.player.PermittedPlayerRepository;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import java.util.Locale;
 
 @Getter
 public class PlayerPermissionPlugin extends JavaPlugin {
@@ -21,6 +23,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
   private PermissionGroupRepository groupRepository;
   private CommandRegistrar commandRegistrar;
   private PermissionDriver permissionDriver;
+  private MessageLocalization localization;
 
   @Override
   public void onLoad() {
@@ -41,6 +44,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
     this.permissionDriver = new PermissionDriver(postgreSqlGateway);
     this.playerRepository = new PermittedPlayerRepository();
     this.groupRepository = new PermissionGroupRepository();
+    this.localization = MessageLocalization.ofLocale(Locale.GERMANY);
 
     List.of(commandRegistrar, new PlayerChatListener(), new PlayerStateListener())
         .forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
