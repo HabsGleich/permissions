@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -28,6 +26,7 @@ public class PermissionGroup {
 
   private static final Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
   private final Map<String, Boolean> stateCache = new HashMap<>();
+  private final Set<String> setCache = new HashSet<>();
 
   /**
    * Checks if a group has the given permission
@@ -44,6 +43,7 @@ public class PermissionGroup {
       Pattern pattern = getPattern(perm);
       if (pattern.matcher(permission).matches()) {
         stateCache.put(permission, true);
+        setCache.add(permission);
         return true;
       }
     }
@@ -52,6 +52,7 @@ public class PermissionGroup {
       Pattern pattern = getPattern(perm);
       if (pattern.matcher(permission).matches()) {
         stateCache.put(permission, false);
+        setCache.add(permission);
         return false;
       }
     }
@@ -99,5 +100,6 @@ public class PermissionGroup {
    */
   public void invalidate(String permission) {
     stateCache.remove(permission);
+    setCache.remove(permission);
   }
 }

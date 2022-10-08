@@ -41,13 +41,13 @@ public class SimplePermissibleBase extends PermissibleBase {
 
   @Override
   public boolean isPermissionSet(@NotNull String name) {
-    return isPermissionSet0(name);
+    return isPermissionSet0(name, false);
   }
 
   @Override
   public boolean isPermissionSet(@NotNull Permission perm) {
     String name = perm.getName().toLowerCase(Locale.ENGLISH);
-    return isPermissionSet0(name);
+    return isPermissionSet0(name, false);
   }
 
   /**
@@ -67,7 +67,7 @@ public class SimplePermissibleBase extends PermissibleBase {
     }
 
     // If the permission isn't set fallback will be used
-    if (!isPermissionSet0(name)) {
+    if (!isPermissionSet0(name, true)) {
       return super.hasPermission(name);
     }
     return optionalPlayer.get().hasPermission(name);
@@ -77,9 +77,10 @@ public class SimplePermissibleBase extends PermissibleBase {
    * Checks if the permission is set for the player
    *
    * @param name The permission
+   * @param onlyIntern Defines if only group permissions should be checked, not the fallback
    * @return The set status
    */
-  private boolean isPermissionSet0(String name) {
+  private boolean isPermissionSet0(String name, boolean onlyIntern) {
     UUID uuid = player.getUniqueId();
 
     Optional<PermittedPlayer> optionalPlayer =
@@ -92,7 +93,7 @@ public class SimplePermissibleBase extends PermissibleBase {
 
     boolean permissionSet = optionalPlayer.get().isPermissionSet(name);
     // If permission is set in fallback use fallback
-    if (!permissionSet && fallbackPermissionSet) {
+    if (!permissionSet && fallbackPermissionSet && !onlyIntern) {
       return true;
     }
 

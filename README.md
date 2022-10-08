@@ -1,8 +1,9 @@
 # Player Permissions
 
-A basic permission system, for simple or for learning purposes, use as you like.
+A basic permission system, for simple usage or for learning purposes, use as you like.
 <br>
-This was my first time using PostgreSQL and Brigadier, if you find any mistakes or ways to improve the code feel free to create an issue or pull
+This was my first time using PostgreSQL and Brigadier, if you find any mistakes or ways to improve the code feel free to
+create an issue or pull
 request.
 
 ## Features
@@ -22,10 +23,26 @@ request.
 - **Signs**
     - Server owners can place signs on the server where players can view their rank and the expiry time live
 
+## Permissions
+
+Below you can find all permissions and what they are for
+
+- `permissions.command.perms` -> Access to the /perms command
+- `permissions.command.perms.lang` -> Access to change language
+- `permissions.command.perms.player.group` -> Access to change a players group
+- `permissions.command.perms.player.info` -> Access to view information about a player
+- `permissions.command.perms.group.create` -> Access to create a new group
+- `permissions.command.perms.group.delete` -> Access to delete an existing group
+- `permissions.command.perms.group.default` -> Access to make a group the default
+- `permissions.command.perms.group.prefix` -> Access to change a groups prefix
+- `permissions.command.perms.group.info` -> Access to view information about a group
+- `permissions.command.perms.group.permission` -> Access to modify group permissions
+
 ## TODO
+
 - [x] Actually implement PermissibleBase for perms to work
 - [x] Automatic rank expiry while in-game (currently only on join)
-- [ ] Re-work permissions for Perms command
+- [x] Re-work permissions for Perms command
 - [ ] Make /rank work
 - [ ] Signs
 - [ ] Unit Tests

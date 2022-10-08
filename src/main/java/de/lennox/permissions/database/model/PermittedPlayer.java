@@ -80,9 +80,12 @@ public class PermittedPlayer {
     }
 
     PermissionGroup group = optionalGroup.get();
-    // Execute permission check to make sure its in cache if the player has the permission
+    if (group.getSetCache().contains(permission)) {
+      return true;
+    }
+    // Re-try after checking for permission
     group.hasPermission(permission);
-    return group.getStateCache().containsKey(permission);
+    return group.getSetCache().contains(permission);
   }
 
   /**
