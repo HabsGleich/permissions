@@ -8,23 +8,25 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Contains all cached permission groups, caches are invalidated for after 15 minutes for every
- * group individually or if another source requests invalidation (e.g. command execution)
+ * Contains all cached permission groups.
+ *
+ * <p>The group cache is never being invalidated, it is only being updated.
  *
  * @since 1.0.0
  * @author Lennox
  */
 @Getter
 public class PermissionGroupRepository {
-  private final Cache<String, PermissionGroup> cachedGroups =
-      CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(15)).build();
+  private final Map<String, PermissionGroup> cachedGroups = new HashMap<>();
 
   @Setter private PermissionGroup defaultGroup;
 
@@ -72,9 +74,8 @@ public class PermissionGroupRepository {
    */
   public CompletableFuture<Optional<PermissionGroup>> getGroup(String name) {
     CompletableFuture<Optional<PermissionGroup>> groupFuture = new CompletableFuture<>();
-    PermissionGroup group = cachedGroups.getIfPresent(name);
-    if (group != null) {
-      groupFuture.complete(Optional.of(group));
+    if (cachedGroups.containsKey(name)) {
+      groupFuture.complete(Optional.of(cachedGroups.get(name)));
     } else {
       PlayerPermissionPlugin.getSingleton()
           .getPermissionDriver()
@@ -103,7 +104,7 @@ public class PermissionGroupRepository {
    * @return The optional group
    */
   public Optional<PermissionGroup> getGroupNoQuery(String name) {
-    return Optional.ofNullable(cachedGroups.getIfPresent(name));
+    return Optional.ofNullable(cachedGroups.get(name));
   }
 
   /**
@@ -124,7 +125,7 @@ public class PermissionGroupRepository {
    * @return Contained or not
    */
   public boolean hasGroup(String name) {
-    return cachedGroups.getIfPresent(name) != null;
+    return cachedGroups.containsKey(name);
   }
 
   /**
@@ -134,6 +135,6 @@ public class PermissionGroupRepository {
    * @since 1.0.0
    */
   public void invalidate(String name) {
-    cachedGroups.invalidate(name);
+    cachedGroups.remove(name);
   }
 }
