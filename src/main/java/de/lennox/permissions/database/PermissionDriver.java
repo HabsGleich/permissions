@@ -2,8 +2,8 @@ package de.lennox.permissions.database;
 
 import de.lennox.permissions.database.builder.StatementBuilder;
 import de.lennox.permissions.database.postgre.PostgreSqlGateway;
-import de.lennox.permissions.database.result.PermissionGroupResult;
-import de.lennox.permissions.database.result.PermittedPlayerResult;
+import de.lennox.permissions.database.model.PermissionGroup;
+import de.lennox.permissions.database.model.PermittedPlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.util.Tuple;
@@ -40,8 +40,8 @@ public class PermissionDriver {
    * @return The future optional permitted player
    * @since 1.0.0
    */
-  public CompletableFuture<Optional<PermittedPlayerResult>> queryPlayerById(UUID uuid) {
-    CompletableFuture<Optional<PermittedPlayerResult>> playerFuture = new CompletableFuture<>();
+  public CompletableFuture<Optional<PermittedPlayer>> queryPlayerById(UUID uuid) {
+    CompletableFuture<Optional<PermittedPlayer>> playerFuture = new CompletableFuture<>();
     databaseThreadPool.execute(
         () -> {
           try {
@@ -67,7 +67,7 @@ public class PermissionDriver {
             long expirationDate = result.getLong("expiration_date");
 
             playerFuture.complete(
-                Optional.of(new PermittedPlayerResult(uuid, rank, expirationDate)));
+                Optional.of(new PermittedPlayer(uuid, rank, expirationDate)));
           } catch (SQLException e) {
             System.err.println(
                 "Failed to read player query result! For precise details see the stacktrace below.");
@@ -85,8 +85,8 @@ public class PermissionDriver {
    * @return The future optional list of permission groups
    * @since 1.0.0
    */
-  public CompletableFuture<Optional<List<PermissionGroupResult>>> queryAllGroups() {
-    CompletableFuture<Optional<List<PermissionGroupResult>>> groupListFuture =
+  public CompletableFuture<Optional<List<PermissionGroup>>> queryAllGroups() {
+    CompletableFuture<Optional<List<PermissionGroup>>> groupListFuture =
         new CompletableFuture<>();
     databaseThreadPool.execute(
         () -> {
@@ -103,7 +103,7 @@ public class PermissionDriver {
             //noinspection OptionalGetWithoutIsPresent
             ResultSet result = optionalResult.get();
             // Construct the groups from query result
-            List<PermissionGroupResult> groups = new ArrayList<>();
+            List<PermissionGroup> groups = new ArrayList<>();
             while (result.next()) {
               String groupName = result.getString("name");
               String prefix = result.getString("prefix");
@@ -114,14 +114,14 @@ public class PermissionDriver {
               // Insert non-permitted group if no permission could be received
               if (optionalPermissions.isEmpty()) {
                 groups.add(
-                    new PermissionGroupResult(
+                    new PermissionGroup(
                         groupName, prefix, defaultGroup, new ArrayList<>(), new ArrayList<>()));
                 return;
               }
 
               Tuple<List<String>, List<String>> permissions = optionalPermissions.get();
               groups.add(
-                  new PermissionGroupResult(
+                  new PermissionGroup(
                       groupName, prefix, defaultGroup, permissions.getA(), permissions.getB()));
             }
             groupListFuture.complete(Optional.of(groups));
@@ -142,8 +142,8 @@ public class PermissionDriver {
    * @return The future optional permission group
    * @since 1.0.0
    */
-  public CompletableFuture<Optional<PermissionGroupResult>> queryGroupByName(String name) {
-    CompletableFuture<Optional<PermissionGroupResult>> groupFuture = new CompletableFuture<>();
+  public CompletableFuture<Optional<PermissionGroup>> queryGroupByName(String name) {
+    CompletableFuture<Optional<PermissionGroup>> groupFuture = new CompletableFuture<>();
     databaseThreadPool.execute(
         () -> {
           try {
@@ -174,7 +174,7 @@ public class PermissionDriver {
                       if (optionalPermissions.isEmpty()) {
                         groupFuture.complete(
                             Optional.of(
-                                new PermissionGroupResult(
+                                new PermissionGroup(
                                     name,
                                     prefix,
                                     defaultGroup,
@@ -186,7 +186,7 @@ public class PermissionDriver {
                       Tuple<List<String>, List<String>> permissions = optionalPermissions.get();
                       groupFuture.complete(
                           Optional.of(
-                              new PermissionGroupResult(
+                              new PermissionGroup(
                                   name,
                                   prefix,
                                   defaultGroup,
@@ -368,8 +368,8 @@ public class PermissionDriver {
    * @return The completable created player
    * @since 1.0.0
    */
-  public CompletableFuture<PermittedPlayerResult> createPermittedPlayer(UUID uuid) {
-    CompletableFuture<PermittedPlayerResult> playerFuture = new CompletableFuture<>();
+  public CompletableFuture<PermittedPlayer> createPermittedPlayer(UUID uuid) {
+    CompletableFuture<PermittedPlayer> playerFuture = new CompletableFuture<>();
     databaseThreadPool.execute(
         () -> {
           StatementBuilder.forConnection(connection())
@@ -377,20 +377,20 @@ public class PermissionDriver {
               .withParameters(uuid.toString(), "", -1)
               .execute();
 
-          playerFuture.complete(new PermittedPlayerResult(uuid, "", -1));
+          playerFuture.complete(new PermittedPlayer(uuid, "", -1));
         });
     return playerFuture;
   }
 
   /**
-   * Updates a users permission group for the given time
+   * Updates a players permission group for the given time
    *
    * @param uuid The player uuid
    * @param name The group name
    * @param time The expiration date as UNIX timestamp
    * @since 1.0.0
    */
-  public void updateUserGroup(UUID uuid, String name, long time) {
+  public void updatePlayerGroup(UUID uuid, String name, long time) {
     databaseThreadPool.execute(
         () ->
             StatementBuilder.forConnection(connection())

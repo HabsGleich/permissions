@@ -5,8 +5,9 @@ import com.mojang.brigadier.context.CommandContext;
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.command.Command;
 import de.lennox.permissions.database.PermissionDriver;
-import de.lennox.permissions.database.result.PermissionGroupResult;
-import de.lennox.permissions.database.result.PermittedPlayerResult;
+import de.lennox.permissions.database.model.PermissionGroup;
+import de.lennox.permissions.database.model.PermittedPlayer;
+import de.lennox.permissions.player.PermittedPlayerRepository;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.commands.CommandSourceStack;
@@ -134,6 +135,7 @@ public class PermsCommand extends Command {
    */
   private void updateUserGroup(CommandContext<CommandSourceStack> context, long time) {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    PermittedPlayerRepository playerRepository = permissions.getPlayerRepository();
     CommandSender sender = context.getSource().getBukkitSender();
     String name = context.getArgument("name", String.class);
     String groupName = context.getArgument("groupName", String.class);
@@ -156,15 +158,15 @@ public class PermsCommand extends Command {
                   return;
                 }
 
-                permissions.getPermissionDriver().updateUserGroup(playerId, groupName, time);
+                permissions.getPermissionDriver().updatePlayerGroup(playerId, groupName, time);
                 // Update cache if player is online
                 if (offlinePlayer.isOnline()) {
-                  permissions
-                      .getPlayerRepository()
+                  playerRepository
                       .getPermittedPlayer(playerId)
                       .whenComplete(
                           (permittedPlayer, throwable) -> {
-                            permittedPlayer.setRank(groupName);
+                            playerRepository.updatePlayerGroupCache(uuid, groupName);
+                            permittedPlayer.setGroup(groupName);
                             permittedPlayer.setExpiresAt(time);
                           });
                 }
@@ -207,7 +209,7 @@ public class PermsCommand extends Command {
                             return;
                           }
 
-                          PermittedPlayerResult permittedPlayer = optionalPlayer.get();
+                          PermittedPlayer permittedPlayer = optionalPlayer.get();
                           long expirationTime = permittedPlayer.getExpiresAt();
                           sender.sendMessage(
                               Component.text(
@@ -222,7 +224,7 @@ public class PermsCommand extends Command {
                                           String.format(
                                               " - %s: %s\n",
                                               getLocalizedMessage(uuid, "group"),
-                                              permittedPlayer.getRank()),
+                                              permittedPlayer.getGroup()),
                                           NamedTextColor.GRAY))
                                   .append(
                                       Component.text(
@@ -431,7 +433,7 @@ public class PermsCommand extends Command {
                                     return;
                                   }
 
-                                  PermissionGroupResult group = optionalGroup.get();
+                                  PermissionGroup group = optionalGroup.get();
                                   permissions
                                       .getPermissionDriver()
                                       .updateGroupPrefix(groupName, prefix);
@@ -477,7 +479,7 @@ public class PermsCommand extends Command {
                             return;
                           }
 
-                          PermissionGroupResult group = optionalGroup.get();
+                          PermissionGroup group = optionalGroup.get();
                           sender.sendMessage(
                               Component.text(
                                       String.format(
@@ -533,7 +535,7 @@ public class PermsCommand extends Command {
         .then(
             literal("add")
                 .then(
-                    argument("permission", string())
+                    argument("permission", greedyString())
                         .executes(
                             context -> {
                               updateGroupPermission(context, false, true);
@@ -542,7 +544,7 @@ public class PermsCommand extends Command {
         .then(
             literal("remove")
                 .then(
-                    argument("permission", string())
+                    argument("permission", greedyString())
                         .executes(
                             context -> {
                               updateGroupPermission(context, false, false);
@@ -562,7 +564,7 @@ public class PermsCommand extends Command {
         .then(
             literal("add")
                 .then(
-                    argument("permission", string())
+                    argument("permission", greedyString())
                         .executes(
                             context -> {
                               updateGroupPermission(context, true, true);
@@ -571,7 +573,7 @@ public class PermsCommand extends Command {
         .then(
             literal("remove")
                 .then(
-                    argument("permission", string())
+                    argument("permission", greedyString())
                         .executes(
                             context -> {
                               updateGroupPermission(context, true, false);
@@ -611,9 +613,10 @@ public class PermsCommand extends Command {
                   return;
                 }
 
-                PermissionGroupResult group = optionalGroup.get();
+                PermissionGroup group = optionalGroup.get();
                 List<String> list =
                     denied ? group.getDeniedPermissions() : group.getAllowedPermissions();
+                group.invalidate(permission);
                 if (add) {
                   driver.addPermissionToGroup(groupName, permission, denied);
                   list.add(permission);

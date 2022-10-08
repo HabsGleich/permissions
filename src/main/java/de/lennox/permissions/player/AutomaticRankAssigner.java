@@ -1,7 +1,7 @@
 package de.lennox.permissions.player;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
-import de.lennox.permissions.database.result.PermittedPlayerResult;
+import de.lennox.permissions.database.model.PermittedPlayer;
 import org.bukkit.Bukkit;
 
 import java.util.Map;
@@ -32,16 +32,17 @@ public class AutomaticRankAssigner {
    * @since 1.0.0
    */
   private void checkPlayersForExpiry() {
-    Map<UUID, PermittedPlayerResult> players =
-        PlayerPermissionPlugin.getSingleton().getPlayerRepository().getCachedPlayers();
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    Map<UUID, PermittedPlayer> players = permissions.getPlayerRepository().getCachedPlayers();
 
-    for (PermittedPlayerResult permittedPlayer : players.values()) {
+    for (PermittedPlayer permittedPlayer : players.values()) {
       // Set to default group if expired
       if (permittedPlayer.isRankExpired()) {
-        PlayerPermissionPlugin.getSingleton()
-            .getPermissionDriver()
-            .updateUserGroup(permittedPlayer.getUuid(), "", -1);
-        permittedPlayer.setRank("");
+        UUID uuid = permittedPlayer.getUuid();
+
+        permissions.getPermissionDriver().updatePlayerGroup(uuid, "", -1);
+        permissions.getPlayerRepository().updatePlayerGroupCache(uuid, "");
+        permittedPlayer.setGroup("");
         permittedPlayer.setExpiresAt(-1);
       }
     }

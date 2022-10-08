@@ -3,7 +3,7 @@ package de.lennox.permissions.group;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import de.lennox.permissions.PlayerPermissionPlugin;
-import de.lennox.permissions.database.result.PermissionGroupResult;
+import de.lennox.permissions.database.model.PermissionGroup;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,10 +23,10 @@ import java.util.logging.Logger;
  */
 @Getter
 public class PermissionGroupRepository {
-  private final Cache<String, PermissionGroupResult> cachedGroups =
+  private final Cache<String, PermissionGroup> cachedGroups =
       CacheBuilder.newBuilder().expireAfterAccess(Duration.ofMinutes(15)).build();
 
-  @Setter private PermissionGroupResult defaultGroup;
+  @Setter private PermissionGroup defaultGroup;
 
   /**
    * Builds an initial cache with all currently in-database persistent permission groups
@@ -49,8 +49,8 @@ public class PermissionGroupRepository {
                 return;
               }
 
-              List<PermissionGroupResult> groups = optionalGroups.get();
-              for (PermissionGroupResult group : groups) {
+              List<PermissionGroup> groups = optionalGroups.get();
+              for (PermissionGroup group : groups) {
                 if (group.isDefaultGroup()) {
                   defaultGroup = group;
                 }
@@ -70,9 +70,9 @@ public class PermissionGroupRepository {
    * @return The future optional group
    * @since 1.0.0
    */
-  public CompletableFuture<Optional<PermissionGroupResult>> getGroup(String name) {
-    CompletableFuture<Optional<PermissionGroupResult>> groupFuture = new CompletableFuture<>();
-    PermissionGroupResult group = cachedGroups.getIfPresent(name);
+  public CompletableFuture<Optional<PermissionGroup>> getGroup(String name) {
+    CompletableFuture<Optional<PermissionGroup>> groupFuture = new CompletableFuture<>();
+    PermissionGroup group = cachedGroups.getIfPresent(name);
     if (group != null) {
       groupFuture.complete(Optional.of(group));
     } else {
@@ -87,12 +87,23 @@ public class PermissionGroupRepository {
                   return;
                 }
 
-                PermissionGroupResult databaseGroup = optionalGroup.get();
+                PermissionGroup databaseGroup = optionalGroup.get();
                 cachedGroups.put(databaseGroup.getName(), databaseGroup);
                 groupFuture.complete(Optional.of(databaseGroup));
               });
     }
     return groupFuture;
+  }
+
+  /**
+   * Gets a group from the cache, no queries are executed here to provide instantaneous access to
+   * cached groups (usually all groups are cached unless they are directly added by a third party)
+   *
+   * @param name The group name
+   * @return The optional group
+   */
+  public Optional<PermissionGroup> getGroupNoQuery(String name) {
+    return Optional.ofNullable(cachedGroups.getIfPresent(name));
   }
 
   /**
@@ -102,7 +113,7 @@ public class PermissionGroupRepository {
    * @return The optional default group
    * @since 1.0.0
    */
-  public Optional<PermissionGroupResult> getDefaultGroup() {
+  public Optional<PermissionGroup> getDefaultGroup() {
     return Optional.ofNullable(defaultGroup);
   }
 

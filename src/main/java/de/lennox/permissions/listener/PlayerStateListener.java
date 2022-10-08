@@ -1,9 +1,10 @@
 package de.lennox.permissions.listener;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
-import de.lennox.permissions.database.result.PermissionGroupResult;
-import de.lennox.permissions.database.result.PermittedPlayerResult;
+import de.lennox.permissions.database.model.PermissionGroup;
+import de.lennox.permissions.database.model.PermittedPlayer;
 import de.lennox.permissions.group.PermissionGroupRepository;
+import de.lennox.permissions.permission.PermissibleBaseInjector;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -18,43 +19,44 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerStateListener implements Listener {
+  private final PermissibleBaseInjector injector = new PermissibleBaseInjector();
+
   @EventHandler
   private void onPlayerLogin(AsyncPlayerPreLoginEvent event) {
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     UUID player = event.getUniqueId();
 
     // Let the player wait until his data is loaded
-    PermittedPlayerResult permittedPlayer =
-        PlayerPermissionPlugin.getSingleton()
-            .getPlayerRepository()
-            .getPermittedPlayer(player)
-            .join();
+    PermittedPlayer permittedPlayer =
+        permissions.getPlayerRepository().getPermittedPlayer(player).join();
 
     // Automatically assign player to default group on rank expire
     if (permittedPlayer.isRankExpired()) {
-      PlayerPermissionPlugin.getSingleton().getPermissionDriver().updateUserGroup(player, "", -1);
-      permittedPlayer.setRank("");
+      permissions.getPermissionDriver().updatePlayerGroup(player, "", -1);
+      permissions.getPlayerRepository().updatePlayerGroupCache(player, "");
+      permittedPlayer.setGroup("");
       permittedPlayer.setExpiresAt(-1);
     }
   }
 
   @EventHandler
   private void onPlayerJoin(PlayerJoinEvent event) {
-    // Will be replaced with custom message
     event.joinMessage(Component.empty());
 
     Player player = event.getPlayer();
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     PermissionGroupRepository groups = permissions.getGroupRepository();
 
+    injector.injectIntoPlayer(player);
     permissions
         .getPlayerRepository()
         .getPermittedPlayer(player.getUniqueId())
         .whenCompleteAsync(
             (permittedPlayer, t) -> {
-              String playerRankName = permittedPlayer.getRank();
+              String playerRankName = permittedPlayer.getGroup();
               boolean useDefaultRank = playerRankName.isEmpty();
               // Use default rank if player rank is empty
-              Optional<PermissionGroupResult> playerRank =
+              Optional<PermissionGroup> playerRank =
                   useDefaultRank
                       ? groups.getDefaultGroup()
                       : groups.getGroup(playerRankName).join();
@@ -69,7 +71,9 @@ public class PlayerStateListener implements Listener {
               }
               Bukkit.broadcast(
                   Component.text(
-                      String.format("[%s] %s", playerRank.get().getPrefix(), player.getName()),
+                      String.format(
+                          "[%s] %s joined the game",
+                          playerRank.get().getPrefix(), player.getName()),
                       NamedTextColor.YELLOW));
             });
   }

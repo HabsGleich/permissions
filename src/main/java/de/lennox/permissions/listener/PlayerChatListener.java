@@ -1,7 +1,7 @@
 package de.lennox.permissions.listener;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
-import de.lennox.permissions.database.result.PermissionGroupResult;
+import de.lennox.permissions.database.model.PermissionGroup;
 import de.lennox.permissions.group.PermissionGroupRepository;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
@@ -35,10 +35,10 @@ public class PlayerChatListener implements Listener {
         .getPermittedPlayer(player.getUniqueId())
         .whenCompleteAsync(
             (permittedPlayer, t) -> {
-              String playerRankName = permittedPlayer.getRank();
+              String playerRankName = permittedPlayer.getGroup();
               boolean useDefaultRank = playerRankName.isEmpty();
               // Use default rank if player rank is empty
-              Optional<PermissionGroupResult> playerRank =
+              Optional<PermissionGroup> playerRank =
                   useDefaultRank
                       ? groups.getDefaultGroup()
                       : groups.getGroup(playerRankName).join();
