@@ -1,9 +1,9 @@
 package de.lennox.permissions.database;
 
 import de.lennox.permissions.database.builder.StatementBuilder;
-import de.lennox.permissions.database.postgre.PostgreSqlGateway;
 import de.lennox.permissions.database.model.PermissionGroup;
 import de.lennox.permissions.database.model.PermittedPlayer;
+import de.lennox.permissions.database.postgre.PostgreSqlGateway;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.util.Tuple;
@@ -66,8 +66,7 @@ public class PermissionDriver {
             String rank = result.getString("group");
             long expirationDate = result.getLong("expiration_date");
 
-            playerFuture.complete(
-                Optional.of(new PermittedPlayer(uuid, rank, expirationDate)));
+            playerFuture.complete(Optional.of(new PermittedPlayer(uuid, rank, expirationDate)));
           } catch (SQLException e) {
             System.err.println(
                 "Failed to read player query result! For precise details see the stacktrace below.");
@@ -86,8 +85,7 @@ public class PermissionDriver {
    * @since 1.0.0
    */
   public CompletableFuture<Optional<List<PermissionGroup>>> queryAllGroups() {
-    CompletableFuture<Optional<List<PermissionGroup>>> groupListFuture =
-        new CompletableFuture<>();
+    CompletableFuture<Optional<List<PermissionGroup>>> groupListFuture = new CompletableFuture<>();
     databaseThreadPool.execute(
         () -> {
           try {

@@ -1,6 +1,5 @@
 package de.lennox.permissions.database.model;
 
-import it.unimi.dsi.fastutil.Hash;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -20,13 +19,13 @@ import java.util.regex.PatternSyntaxException;
 @Data
 @AllArgsConstructor
 public class PermissionGroup {
+  // Static to share patterns between groups
   private final String name;
   private String prefix;
   private boolean defaultGroup;
   private final List<String> allowedPermissions;
   private final List<String> deniedPermissions;
 
-  // Static to share patterns between groups
   private static final Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
   private final Map<String, Boolean> stateCache = new HashMap<>();
 

@@ -1,13 +1,10 @@
 package de.lennox.permissions.group;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.model.PermissionGroup;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

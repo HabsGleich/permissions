@@ -27,6 +27,17 @@ public class StatementBuilder {
   }
 
   /**
+   * Creates a new statement builder for the given jdbc connection
+   *
+   * @param connection The jdbc connection
+   * @return The statement builder
+   * @since 1.0.0
+   */
+  public static StatementBuilder forConnection(Connection connection) {
+    return new StatementBuilder(connection);
+  }
+
+  /**
    * Sets the sql statement
    *
    * @param sql The sql statement
@@ -109,16 +120,5 @@ public class StatementBuilder {
       e.printStackTrace();
       return Optional.empty();
     }
-  }
-
-  /**
-   * Creates a new statement builder for the given jdbc connection
-   *
-   * @param connection The jdbc connection
-   * @return The statement builder
-   * @since 1.0.0
-   */
-  public static StatementBuilder forConnection(Connection connection) {
-    return new StatementBuilder(connection);
   }
 }

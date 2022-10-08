@@ -10,7 +10,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +62,8 @@ public class LocalizationRepository {
         new URLClassLoader(new URL[] {languageBundleFolder.toURI().toURL()});
     for (String language : languages) {
       localeCache.put(
-          language, LocalizationProvider.ofLocale(Locale.forLanguageTag(language), languageBundleLoader));
+          language,
+          LocalizationProvider.ofLocale(Locale.forLanguageTag(language), languageBundleLoader));
     }
   }
 
