@@ -43,7 +43,7 @@ Below you can find all permissions and what they are for
 - [x] Actually implement PermissibleBase for perms to work
 - [x] Automatic rank expiry while in-game (currently only on join)
 - [x] Re-work permissions for Perms command
-- [ ] Make /rank work
+- [x] Make /rank work
 - [ ] Signs
 - [ ] Unit Tests
 

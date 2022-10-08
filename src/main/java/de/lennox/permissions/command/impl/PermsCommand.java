@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.command.Command;
+import de.lennox.permissions.command.TimeInputFormatter;
 import de.lennox.permissions.database.PermissionDriver;
 import de.lennox.permissions.database.model.PermissionGroup;
 import de.lennox.permissions.database.model.PermittedPlayer;
@@ -53,7 +54,9 @@ public class PermsCommand extends Command {
     return literal("language")
         .then(
             argument("lang", string())
-                .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.lang"))
+                .requires(
+                    stack ->
+                        stack.getBukkitSender().hasPermission("permissions.command.perms.lang"))
                 .suggests(
                     (ctx, builder) -> {
                       for (String language :
@@ -109,7 +112,9 @@ public class PermsCommand extends Command {
    */
   private LiteralArgumentBuilder<CommandSourceStack> createUserGroupCommand() {
     return literal("group")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.player.group"))
+        .requires(
+            stack ->
+                stack.getBukkitSender().hasPermission("permissions.command.perms.player.group"))
         .then(
             literal("set")
                 .then(
@@ -118,7 +123,11 @@ public class PermsCommand extends Command {
                             argument("expiresIn", greedyString())
                                 .executes(
                                     context -> {
-                                      updateUserGroup(context, System.currentTimeMillis() + 20000);
+                                      updateUserGroup(
+                                          context,
+                                          System.currentTimeMillis()
+                                              + TimeInputFormatter.parseTimeInput(
+                                                  context.getArgument("expiresIn", String.class)));
                                       return 1;
                                     }))
                         .executes(
@@ -190,7 +199,8 @@ public class PermsCommand extends Command {
    */
   private LiteralArgumentBuilder<CommandSourceStack> createUserInfoSubCommand() {
     return literal("info")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.player.info"))
+        .requires(
+            stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.player.info"))
         .executes(
             context -> {
               CommandSender sender = context.getSource().getBukkitSender();
@@ -290,7 +300,9 @@ public class PermsCommand extends Command {
   private LiteralArgumentBuilder<CommandSourceStack> createGroupCreateSubCommand() {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     return literal("create")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.create"))
+        .requires(
+            stack ->
+                stack.getBukkitSender().hasPermission("permissions.command.perms.group.create"))
         .executes(
             context -> {
               CommandSender sender = context.getSource().getBukkitSender();
@@ -328,7 +340,9 @@ public class PermsCommand extends Command {
   private LiteralArgumentBuilder<CommandSourceStack> createGroupDeleteSubCommand() {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     return literal("delete")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.delete"))
+        .requires(
+            stack ->
+                stack.getBukkitSender().hasPermission("permissions.command.perms.group.delete"))
         .executes(
             context -> {
               CommandSender sender = context.getSource().getBukkitSender();
@@ -368,7 +382,9 @@ public class PermsCommand extends Command {
   private LiteralArgumentBuilder<CommandSourceStack> createGroupDefaultSubCommand() {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     return literal("default")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.default"))
+        .requires(
+            stack ->
+                stack.getBukkitSender().hasPermission("permissions.command.perms.group.default"))
         .executes(
             context -> {
               CommandSender sender = context.getSource().getBukkitSender();
@@ -413,7 +429,9 @@ public class PermsCommand extends Command {
   public LiteralArgumentBuilder<CommandSourceStack> createGroupPrefixSubCommand() {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     return literal("prefix")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.prefix"))
+        .requires(
+            stack ->
+                stack.getBukkitSender().hasPermission("permissions.command.perms.group.prefix"))
         .then(
             argument("prefix", string())
                 .executes(
@@ -464,7 +482,8 @@ public class PermsCommand extends Command {
    */
   private LiteralArgumentBuilder<CommandSourceStack> createGroupInfoSubCommand() {
     return literal("info")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.info"))
+        .requires(
+            stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.info"))
         .executes(
             context -> {
               CommandSender sender = context.getSource().getBukkitSender();
@@ -526,7 +545,9 @@ public class PermsCommand extends Command {
    */
   private LiteralArgumentBuilder<CommandSourceStack> createGroupPermissionsSubCommand() {
     return literal("permissions")
-        .requires(stack -> stack.getBukkitSender().hasPermission("permissions.command.perms.group.permission"))
+        .requires(
+            stack ->
+                stack.getBukkitSender().hasPermission("permissions.command.perms.group.permission"))
         .then(createGroupPermissionsAllowedCommand())
         .then(createGroupPermissionsDeniedCommand());
   }
