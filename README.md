@@ -23,8 +23,10 @@ request.
     - Server owners can place signs on the server where players can view their rank and the expiry time live
 
 ## TODO
-- [ ] Actually implement PermissibleBase for perms to work
-- [ ] Automatic rank expiry while in-game (currently only on join)
+- [x] Actually implement PermissibleBase for perms to work
+- [x] Automatic rank expiry while in-game (currently only on join)
+- [ ] Re-work permissions for Perms command
+- [ ] Make /rank work
 - [ ] Signs
 - [ ] Unit Tests
 
