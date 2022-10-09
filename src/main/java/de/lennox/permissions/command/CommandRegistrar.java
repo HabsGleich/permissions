@@ -4,8 +4,8 @@ import com.destroystokyo.paper.brigadier.BukkitBrigadierCommandSource;
 import com.destroystokyo.paper.event.brigadier.CommandRegisteredEvent;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import de.lennox.permissions.command.impl.PermsCommand;
-import de.lennox.permissions.command.impl.RankCommand;
+import de.lennox.permissions.command.brigadier.PermsBrigadierCommand;
+import de.lennox.permissions.command.brigadier.RankBrigadierCommand;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.commands.CommandSourceStack;
 import org.bukkit.Server;
@@ -32,8 +32,8 @@ public class CommandRegistrar implements Listener {
    * @since 1.0.0
    */
   public void setup() {
-    registerBrigadierCommand(new PermsCommand());
-    registerBrigadierCommand(new RankCommand());
+    registerBrigadierCommand(new PermsBrigadierCommand());
+    registerBrigadierCommand(new RankBrigadierCommand());
   }
 
   /**

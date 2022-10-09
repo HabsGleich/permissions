@@ -1,4 +1,4 @@
-package de.lennox.permissions.command.impl;
+package de.lennox.permissions.command.brigadier;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.lennox.permissions.PlayerPermissionPlugin;
@@ -12,8 +12,8 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class RankCommand extends Command {
-  public RankCommand() {
+public class RankBrigadierCommand extends Command {
+  public RankBrigadierCommand() {
     super("rank");
   }
 

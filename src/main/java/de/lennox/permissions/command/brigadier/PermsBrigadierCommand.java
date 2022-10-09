@@ -1,4 +1,4 @@
-package de.lennox.permissions.command.impl;
+package de.lennox.permissions.command.brigadier;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -23,8 +23,8 @@ import java.util.function.Consumer;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 
-public class PermsCommand extends Command {
-  public PermsCommand() {
+public class PermsBrigadierCommand extends Command {
+  public PermsBrigadierCommand() {
     super("perms");
   }
 

@@ -33,6 +33,7 @@ public class PermissibleBaseInjector {
     if (!playerClass.isAssignableFrom(player.getClass())) {
       return;
     }
+
     Field permField = playerClass.getDeclaredField(PLAYER_PERMISSION_FIELD);
     permField.setAccessible(true);
     PermissibleBase oldPermissible = (PermissibleBase) permField.get(player);

@@ -80,8 +80,8 @@ public class PlayerStateListener implements Listener {
 
   @EventHandler
   private void onPlayerQuit(PlayerQuitEvent event) {
-    PlayerPermissionPlugin.getSingleton()
-        .getPlayerRepository()
-        .invalidate(event.getPlayer().getUniqueId());
+    UUID uuid = event.getPlayer().getUniqueId();
+    PlayerPermissionPlugin.getSingleton().getPlayerRepository().invalidate(uuid);
+    PlayerPermissionPlugin.getSingleton().getPlayerLanguageRepository().invalidate(uuid);
   }
 }
