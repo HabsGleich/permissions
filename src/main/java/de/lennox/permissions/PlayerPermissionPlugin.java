@@ -2,7 +2,9 @@ package de.lennox.permissions;
 
 import de.lennox.permissions.command.CommandRegistrar;
 import de.lennox.permissions.database.PermissionDriver;
+import de.lennox.permissions.database.SignDriver;
 import de.lennox.permissions.database.postgre.PostgrePermissionDriver;
+import de.lennox.permissions.database.postgre.PostgreSignDriver;
 import de.lennox.permissions.database.postgre.PostgreSqlConfiguration;
 import de.lennox.permissions.database.postgre.PostgreSqlGateway;
 import de.lennox.permissions.group.PermissionGroupRepository;
@@ -29,6 +31,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
   private PermissionDriver permissionDriver;
   private LocalizationRepository localization;
   private AutomaticRankAssigner automaticRankAssigner;
+  private SignDriver signDriver;
 
   @Override
   public void onLoad() {
@@ -39,6 +42,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
   public void onEnable() {
     saveDefaultConfig();
     this.commandRegistrar = new CommandRegistrar(this);
+
     FileConfiguration config = getConfig();
     PostgreSqlGateway postgreSqlGateway =
         new PostgreSqlGateway(
@@ -49,6 +53,8 @@ public class PlayerPermissionPlugin extends JavaPlugin {
                 .password(config.getString("database.password"))
                 .build());
     this.permissionDriver = new PostgrePermissionDriver(postgreSqlGateway);
+    this.signDriver = new PostgreSignDriver(postgreSqlGateway);
+
     this.playerRepository = new PermittedPlayerRepository();
     this.groupRepository = new PermissionGroupRepository();
     this.localization = new LocalizationRepository();

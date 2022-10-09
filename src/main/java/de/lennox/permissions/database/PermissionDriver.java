@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Handles all database queries, updates and deletions
+ * Interface for all permission database executions
  *
  * <p>All statements must be executed asynchronously
  *

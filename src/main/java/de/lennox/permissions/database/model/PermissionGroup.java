@@ -33,6 +33,7 @@ public class PermissionGroup {
    *
    * @param permission The permission
    * @return The state of permission
+   * @since 1.0.0
    */
   public boolean hasPermission(String permission) {
     if (stateCache.containsKey(permission)) {
@@ -64,6 +65,7 @@ public class PermissionGroup {
    *
    * @param input The input
    * @return The regex pattern
+   * @since 1.0.0
    */
   @SneakyThrows
   public Pattern getPattern(String input) {
@@ -88,6 +90,7 @@ public class PermissionGroup {
    *
    * @param input The standard input
    * @return The regex expression
+   * @since 1.0.0
    */
   public String createRegexFromInput(String input) {
     return input.replace(".", "\\.").replace("*", "(.*)");
@@ -97,6 +100,7 @@ public class PermissionGroup {
    * Invalidates a permission for the group
    *
    * @param permission The permission
+   * @since 1.0.0
    */
   public void invalidate(String permission) {
     stateCache.remove(permission);

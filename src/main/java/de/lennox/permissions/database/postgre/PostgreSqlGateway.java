@@ -75,5 +75,18 @@ public class PostgreSqlGateway {
                )
             """)
         .execute();
+    // Create informative signs table
+    StatementBuilder.forConnection(connection)
+        .withSql(
+            """
+               CREATE TABLE IF NOT EXISTS informative_signs(
+                 player_id VARCHAR NOT NULL,
+                 x INTEGER NOT NULL,
+                 y INTEGER NOT NULL,
+                 z INTEGER NOT NULL,
+                 world VARCHAR NOT NULL
+               )
+            """)
+        .execute();
   }
 }

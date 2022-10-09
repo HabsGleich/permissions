@@ -43,21 +43,6 @@ tasks {
     }
 }
 
-run {
-    registerServerTask("1.19.2", 17)
-}
-
-fun registerServerTask(serverVersion: String, javaVersion: Int) {
-    tasks.register<xyz.jpenilla.runpaper.task.RunServerTask>("server_${serverVersion}-j$javaVersion") {
-        group = "Permissions"
-        dependsOn("assemble")
-        pluginJars.from("build/libs/${project.name}-${project.version}.jar")
-        minecraftVersion(serverVersion)
-        runDirectory(File("paper_${serverVersion}-j$javaVersion"))
-        jvmArgs("-Dcom.mojang.eula.agree=true")
-    }
-}
-
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }

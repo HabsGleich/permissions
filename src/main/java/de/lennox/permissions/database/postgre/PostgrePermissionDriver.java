@@ -54,9 +54,9 @@ public class PostgrePermissionDriver implements PermissionDriver {
             // Complete with empty player if query didn't succeed
             if (optionalResult.isEmpty()) {
               playerFuture.complete(Optional.empty());
+              return;
             }
 
-            //noinspection OptionalGetWithoutIsPresent
             ResultSet result = optionalResult.get();
             // Return empty result if there is no player with this name
             if (!result.next()) {
@@ -98,9 +98,9 @@ public class PostgrePermissionDriver implements PermissionDriver {
             // Complete with empty group if query didn't succeed
             if (optionalResult.isEmpty()) {
               groupListFuture.complete(Optional.empty());
+              return;
             }
 
-            //noinspection OptionalGetWithoutIsPresent
             ResultSet result = optionalResult.get();
             // Construct the groups from query result
             List<PermissionGroup> groups = new ArrayList<>();
@@ -156,9 +156,9 @@ public class PostgrePermissionDriver implements PermissionDriver {
             // Complete with empty group if query didn't succeed
             if (optionalResult.isEmpty()) {
               groupFuture.complete(Optional.empty());
+              return;
             }
 
-            //noinspection OptionalGetWithoutIsPresent
             ResultSet result = optionalResult.get();
             // Return empty result if there is no group with this name
             if (!result.next()) {
