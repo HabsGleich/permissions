@@ -19,18 +19,6 @@ public class LocalizationProvider {
   private ResourceBundle bundle;
 
   /**
-   * Creates a new message localization for the given locale
-   *
-   * @param locale The locale
-   * @return The message localization
-   */
-  public static LocalizationProvider ofLocale(Locale locale, ClassLoader loader) {
-    LocalizationProvider provider = new LocalizationProvider(loader, locale);
-    provider.load();
-    return provider;
-  }
-
-  /**
    * Loads the bundle for the given locale
    *
    * @since 1.0.0
@@ -47,5 +35,17 @@ public class LocalizationProvider {
    */
   public String getMessage(String key) {
     return this.bundle.getString(key);
+  }
+
+  /**
+   * Creates a new message localization for the given locale
+   *
+   * @param locale The locale
+   * @return The message localization
+   */
+  public static LocalizationProvider of(Locale locale, ClassLoader loader) {
+    LocalizationProvider provider = new LocalizationProvider(loader, locale);
+    provider.load();
+    return provider;
   }
 }

@@ -15,6 +15,7 @@ import java.util.UUID;
  * @author Lennox
  */
 public class AutomaticRankAssigner {
+
   /**
    * Creates the assigning task through the bukkit scheduler
    *

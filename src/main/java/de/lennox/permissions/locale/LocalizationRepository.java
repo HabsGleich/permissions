@@ -63,7 +63,7 @@ public class LocalizationRepository {
     for (String language : languages) {
       localeCache.put(
           language,
-          LocalizationProvider.ofLocale(Locale.forLanguageTag(language), languageBundleLoader));
+          LocalizationProvider.of(Locale.forLanguageTag(language), languageBundleLoader));
     }
   }
 

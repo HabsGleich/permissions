@@ -58,7 +58,6 @@ fun registerServerTask(serverVersion: String, javaVersion: Int) {
     }
 }
 
-
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
@@ -73,5 +72,6 @@ bukkit {
 }
 
 tasks.getByName<Test>("test") {
+    systemProperty("file.encoding", "utf-8")
     useJUnitPlatform()
 }

@@ -21,6 +21,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Brigadier implementation for paper
+ *
+ * @since 1.0.0
+ * @author Paper Authors, Lennox
+ */
 public class PaperBrigadierCommand extends Command implements PluginIdentifiableCommand {
   private final Consumer<LiteralArgumentBuilder<CommandSourceStack>> command;
   private final Plugin plugin;

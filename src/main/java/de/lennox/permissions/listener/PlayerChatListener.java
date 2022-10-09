@@ -21,6 +21,7 @@ import java.util.Optional;
  * @author Lennox
  */
 public class PlayerChatListener implements Listener {
+
   @EventHandler
   private void onAsyncChat(AsyncChatEvent event) {
     event.setCancelled(true);

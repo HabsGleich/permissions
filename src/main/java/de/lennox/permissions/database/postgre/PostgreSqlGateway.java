@@ -1,12 +1,13 @@
 package de.lennox.permissions.database.postgre;
 
+import de.lennox.permissions.database.builder.StatementBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.postgresql.Driver;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
 /**
  * Connection gateway to the postgresql database
@@ -25,18 +26,12 @@ public class PostgreSqlGateway {
    *
    * @since 1.0.0
    */
+  @SneakyThrows
   public void setup() {
-    try {
-      DriverManager.registerDriver(new Driver());
-      // Establish a connection to the database
-      this.connection =
-          DriverManager.getConnection(
-              config.createJdbcUri(), config.getUser(), config.getPassword());
-    } catch (SQLException e) {
-      System.err.println(
-          "Unable to connect to the provided database, are you sure your credentials are correct? The plugin cannot function properly!");
-      throw new RuntimeException(e);
-    }
+    DriverManager.registerDriver(new Driver());
+    // Establish a connection to the database
+    this.connection =
+        DriverManager.getConnection(config.createJdbcUri(), config.getUser(), config.getPassword());
     // Prepare all tables
     prepareTables();
   }
@@ -47,44 +42,38 @@ public class PostgreSqlGateway {
    * @since 1.0.0
    */
   private void prepareTables() {
-    try {
-      // Create permission groups table
-      connection
-          .createStatement()
-          .execute(
-              """
-        CREATE TABLE IF NOT EXISTS permission_groups(
-          "name" VARCHAR PRIMARY KEY NOT NULL,
-          prefix VARCHAR NOT NULL,
-          "default" BOOLEAN NOT NULL
-        )
-        """);
-      // Create permitted players table
-      connection
-          .createStatement()
-          .execute(
-              """
-        CREATE TABLE IF NOT EXISTS permitted_players(
-          id CHAR(36) PRIMARY KEY NOT NULL,
-          "group" VARCHAR NOT NULL,
-          expiration_date BIGINT NOT NULL
-        )
-        """);
-      // Create permission list table
-      connection
-          .createStatement()
-          .execute(
-              """
-        CREATE TABLE IF NOT EXISTS group_permissions(
-          "group" VARCHAR NOT NULL,
-          permission VARCHAR NOT NULL,
-          denied BOOLEAN NOT NULL
-        )
-        """);
-    } catch (SQLException e) {
-      System.err.println(
-          "Something went horribly wrong while trying to prepare the database tables. The plugin cannot function properly!");
-      throw new RuntimeException(e);
-    }
+    // Create permission groups table
+    StatementBuilder.forConnection(connection)
+        .withSql(
+            """
+                CREATE TABLE IF NOT EXISTS permission_groups(
+                  "name" VARCHAR PRIMARY KEY NOT NULL,
+                  prefix VARCHAR NOT NULL,
+                  "default" BOOLEAN NOT NULL
+                )
+            """)
+        .execute();
+    // Create permitted players table
+    StatementBuilder.forConnection(connection)
+        .withSql(
+            """
+                CREATE TABLE IF NOT EXISTS permitted_players(
+                  id CHAR(36) PRIMARY KEY NOT NULL,
+                  "group" VARCHAR NOT NULL,
+                  expiration_date BIGINT NOT NULL
+                )
+            """)
+        .execute();
+    // Create permission list table
+    StatementBuilder.forConnection(connection)
+        .withSql(
+            """
+               CREATE TABLE IF NOT EXISTS group_permissions(
+                 "group" VARCHAR NOT NULL,
+                 permission VARCHAR NOT NULL,
+                 denied BOOLEAN NOT NULL
+               )
+            """)
+        .execute();
   }
 }
