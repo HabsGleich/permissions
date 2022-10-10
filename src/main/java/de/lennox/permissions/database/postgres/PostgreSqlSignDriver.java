@@ -1,4 +1,4 @@
-package de.lennox.permissions.database.postgre;
+package de.lennox.permissions.database.postgres;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.SignDriver;
@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +28,7 @@ import java.util.logging.Level;
  */
 @Getter
 @RequiredArgsConstructor
-public class PostgreSignDriver implements SignDriver {
+public class PostgreSqlSignDriver implements SignDriver {
   private final ExecutorService databaseThreadPool = Executors.newCachedThreadPool();
   private final PostgreSqlGateway gateway;
 
@@ -108,7 +107,7 @@ public class PostgreSignDriver implements SignDriver {
         () ->
             StatementBuilder.forConnection(getConnection())
                 .withSql(
-                    "DELETE FROM informative_signs WHERE AND x = ? AND y = ? AND z = ? AND world = ?")
+                    "DELETE FROM informative_signs WHERE x = ? AND y = ? AND z = ? AND world = ?")
                 .withParameters(
                     sign.getX(),
                     sign.getY(),

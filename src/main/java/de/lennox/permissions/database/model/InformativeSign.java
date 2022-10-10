@@ -42,7 +42,10 @@ public class InformativeSign {
   public List<Component> getSignComponents(
       PermittedPlayer player, Player bukkitPlayer, String locale) {
     LocalizationRepository localization = PlayerPermissionPlugin.getSingleton().getLocalization();
-    String groupName = player.getGroup().isEmpty() ? "Default" : player.getGroup();
+    String groupName =
+        player.getGroup().isEmpty()
+            ? localization.getMessage(locale, "default")
+            : player.getGroup();
 
     return List.of(
         Component.text(bukkitPlayer.getName(), NamedTextColor.GRAY),
@@ -51,7 +54,10 @@ public class InformativeSign {
             NamedTextColor.AQUA),
         Component.text(localization.getMessage(locale, "expires_at"), NamedTextColor.AQUA),
         Component.text(
-            player.getExpiresAt() != -1 ? player.parseExpiryDate() : "Never", NamedTextColor.AQUA));
+            player.getExpiresAt() != -1
+                ? player.parseExpiryDate()
+                : localization.getMessage(locale, "never"),
+            NamedTextColor.AQUA));
   }
 
   /**

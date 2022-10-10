@@ -79,16 +79,10 @@ public class InformativeSignRepository {
   /**
    * Removes a sign from the cache
    *
-   * @param sign The sign
+   * @param location The sign location
    * @since 1.0.0
    */
-  public void invalidate(InformativeSign sign) {
-    Optional<Location> optionalLocation = sign.getBlockLocation();
-
-    // Can only be removed if location exists
-    if (optionalLocation.isPresent()) {
-      Location location = optionalLocation.get();
-      cachedSigns.remove(location.hashCode());
-    }
+  public void invalidate(Location location) {
+    cachedSigns.remove(location.hashCode());
   }
 }

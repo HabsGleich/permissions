@@ -3,14 +3,14 @@ package de.lennox.permissions;
 import de.lennox.permissions.command.CommandRegistrar;
 import de.lennox.permissions.database.PermissionDriver;
 import de.lennox.permissions.database.SignDriver;
-import de.lennox.permissions.database.postgre.PostgrePermissionDriver;
-import de.lennox.permissions.database.postgre.PostgreSignDriver;
-import de.lennox.permissions.database.postgre.PostgreSqlConfiguration;
-import de.lennox.permissions.database.postgre.PostgreSqlGateway;
+import de.lennox.permissions.database.postgres.PostgreSqlPermissionDriver;
+import de.lennox.permissions.database.postgres.PostgreSqlSignDriver;
+import de.lennox.permissions.database.postgres.PostgreSqlConfiguration;
+import de.lennox.permissions.database.postgres.PostgreSqlGateway;
 import de.lennox.permissions.group.PermissionGroupRepository;
 import de.lennox.permissions.listener.PlayerChatListener;
 import de.lennox.permissions.listener.PlayerStateListener;
-import de.lennox.permissions.listener.PlayerWorldListener;
+import de.lennox.permissions.listener.PlayerSignListener;
 import de.lennox.permissions.locale.LocalizationRepository;
 import de.lennox.permissions.player.AutomaticRankAssigner;
 import de.lennox.permissions.player.PermittedPlayerRepository;
@@ -55,8 +55,8 @@ public class PlayerPermissionPlugin extends JavaPlugin {
                 .user(config.getString("database.username"))
                 .password(config.getString("database.password"))
                 .build());
-    this.permissionDriver = new PostgrePermissionDriver(postgreSqlGateway);
-    this.signDriver = new PostgreSignDriver(postgreSqlGateway);
+    this.permissionDriver = new PostgreSqlPermissionDriver(postgreSqlGateway);
+    this.signDriver = new PostgreSqlSignDriver(postgreSqlGateway);
 
     this.playerRepository = new PermittedPlayerRepository();
     this.groupRepository = new PermissionGroupRepository();
@@ -68,7 +68,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
             commandRegistrar,
             new PlayerChatListener(),
             new PlayerStateListener(),
-            new PlayerWorldListener())
+            new PlayerSignListener())
         .forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
 
     postgreSqlGateway.setup();
