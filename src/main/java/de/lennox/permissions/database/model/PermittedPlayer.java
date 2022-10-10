@@ -2,8 +2,12 @@ package de.lennox.permissions.database.model;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.group.PermissionGroupRepository;
+import de.lennox.permissions.locale.LocalizationRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.entity.Player;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -45,6 +49,36 @@ public class PermittedPlayer {
    */
   public boolean isRankExpired() {
     return expiresAt != -1 && System.currentTimeMillis() > expiresAt;
+  }
+
+  /**
+   * Parses the information about the player to a component
+   *
+   * @param player The player the message is parsed for
+   * @param playerName The players name
+   * @return The component
+   * @since 1.0.0
+   */
+  public Component parseInfoComponent(Player player, String playerName) {
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    LocalizationRepository localization = permissions.getLocalization();
+    String language = permissions.getPlayerLanguageRepository().get(player.getUniqueId());
+
+    return Component.text(
+            String.format(
+                localization.getMessage(language, "command.perms.info.header") + "\n", playerName),
+            NamedTextColor.AQUA)
+        .append(
+            Component.text(
+                String.format(" - %s: %s\n", localization.getMessage(language, "group"), group),
+                NamedTextColor.GRAY))
+        .append(
+            Component.text(
+                String.format(
+                    " - %s: %s",
+                    localization.getMessage(language, "expires_at"),
+                    expiresAt == -1 ? "NEVER" : parseExpiryDate()),
+                NamedTextColor.GRAY));
   }
 
   /**

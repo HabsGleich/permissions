@@ -228,31 +228,7 @@ public class PermsBrigadierCommand extends Command {
                           }
 
                           PermittedPlayer permittedPlayer = optionalPlayer.get();
-                          long expirationTime = permittedPlayer.getExpiresAt();
-                          sender.sendMessage(
-                              Component.text(
-                                      String.format(
-                                              getLocalizedMessage(
-                                                  uuid, "command.perms.info.header"),
-                                              name)
-                                          + "\n",
-                                      NamedTextColor.AQUA)
-                                  .append(
-                                      Component.text(
-                                          String.format(
-                                              " - %s: %s\n",
-                                              getLocalizedMessage(uuid, "group"),
-                                              permittedPlayer.getGroup()),
-                                          NamedTextColor.GRAY))
-                                  .append(
-                                      Component.text(
-                                          String.format(
-                                              " - %s: %s",
-                                              getLocalizedMessage(uuid, "expires_at"),
-                                              expirationTime == -1
-                                                  ? "NEVER"
-                                                  : permittedPlayer.parseExpiryDate()),
-                                          NamedTextColor.GRAY)));
+                          sender.sendMessage(permittedPlayer.parseInfoComponent(player, name));
                         });
               }
 
@@ -511,28 +487,7 @@ public class PermsBrigadierCommand extends Command {
                           }
 
                           PermissionGroup group = optionalGroup.get();
-                          sender.sendMessage(
-                              Component.text(
-                                      String.format(
-                                              getLocalizedMessage(
-                                                  uuid, "command.perms.group.header"),
-                                              group.getName())
-                                          + "\n",
-                                      NamedTextColor.AQUA)
-                                  .append(
-                                      Component.text(
-                                          String.format(
-                                              " - %s: %s\n",
-                                              getLocalizedMessage(uuid, "prefix"),
-                                              group.getPrefix()),
-                                          NamedTextColor.GRAY))
-                                  .append(
-                                      Component.text(
-                                          String.format(
-                                              " - %s: %s",
-                                              getLocalizedMessage(uuid, "default"),
-                                              group.isDefaultGroup()),
-                                          NamedTextColor.GRAY)));
+                          sender.sendMessage(group.parseInfoComponent(player));
                         });
               }
               return 1;

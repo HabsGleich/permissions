@@ -1,8 +1,13 @@
 package de.lennox.permissions.database.model;
 
+import de.lennox.permissions.PlayerPermissionPlugin;
+import de.lennox.permissions.locale.LocalizationRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -105,5 +110,32 @@ public class PermissionGroup {
   public void invalidate(String permission) {
     stateCache.remove(permission);
     setCache.remove(permission);
+  }
+
+  /**
+   * Parses the information about the group to a component
+   *
+   * @param player The player the message is parsed for
+   * @return The component
+   * @since 1.0.0
+   */
+  public Component parseInfoComponent(Player player) {
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    LocalizationRepository localization = permissions.getLocalization();
+    String language = permissions.getPlayerLanguageRepository().get(player.getUniqueId());
+
+    return Component.text(
+            String.format(localization.getMessage(language, "command.perms.group.header"), name)
+                + "\n",
+            NamedTextColor.AQUA)
+        .append(
+            Component.text(
+                String.format(" - %s: %s\n", localization.getMessage(language, "prefix"), prefix),
+                NamedTextColor.GRAY))
+        .append(
+            Component.text(
+                String.format(
+                    " - %s: %s", localization.getMessage(language, "default"), defaultGroup),
+                NamedTextColor.GRAY));
   }
 }
