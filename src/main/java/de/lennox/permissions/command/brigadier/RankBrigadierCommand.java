@@ -41,7 +41,7 @@ public class RankBrigadierCommand extends Command {
                         (permittedPlayer, t) -> {
                           String groupName =
                               permittedPlayer.getGroup().isEmpty()
-                                  ? "Default"
+                                  ? getLocalizedMessage(uuid, "default")
                                   : permittedPlayer.getGroup();
                           long expirationTime = permittedPlayer.getExpiresAt();
 
