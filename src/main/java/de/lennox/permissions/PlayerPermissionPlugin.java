@@ -24,6 +24,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
+/**
+ * Bukkit Entrypoint for the Player Permission Plugin
+ *
+ * @since 1.0.0
+ * @author Lennox
+ */
 @Getter
 public class PlayerPermissionPlugin extends JavaPlugin {
   @Getter private static PlayerPermissionPlugin singleton;
@@ -44,7 +50,6 @@ public class PlayerPermissionPlugin extends JavaPlugin {
   @Override
   public void onEnable() {
     saveDefaultConfig();
-    this.commandRegistrar = new CommandRegistrar(this);
 
     FileConfiguration config = getConfig();
     PostgreSqlGateway postgreSqlGateway =
@@ -63,6 +68,7 @@ public class PlayerPermissionPlugin extends JavaPlugin {
     this.signRepository = new InformativeSignRepository();
     this.localization = new LocalizationRepository();
     this.playerLanguageRepository = new PlayerLanguageRepository();
+    this.commandRegistrar = new CommandRegistrar(this);
 
     List.of(
             commandRegistrar,
