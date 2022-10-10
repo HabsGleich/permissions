@@ -53,6 +53,8 @@ public class PermsBrigadierCommand extends Command {
   /**
    * Creates the language selection sub command
    *
+   * <p>Additionally handles auto-completion for language types by adding all cached languages
+   *
    * @return The language sub command
    * @since 1.0.0
    */

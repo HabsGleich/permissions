@@ -108,6 +108,7 @@ public class LocalizationRepository {
    * @param lang The lang / language
    * @param key The message key
    * @return The localized string
+   * @since 1.0.0
    */
   public String getMessage(String lang, String key) {
     // Return the key on invalid language

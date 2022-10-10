@@ -5,5 +5,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "legend-permissions"
+rootProject.name = "player-permissions"
 

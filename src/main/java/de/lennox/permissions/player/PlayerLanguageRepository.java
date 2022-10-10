@@ -19,6 +19,7 @@ public class PlayerLanguageRepository {
    *
    * @param player The player
    * @param language The language setting
+   * @since 1.0.0
    */
   public void store(UUID player, String language) {
     languageSelectionMap.put(player, language);
@@ -28,6 +29,7 @@ public class PlayerLanguageRepository {
    * Removes the player from the selection cache
    *
    * @param player The player
+   * @since 1.0.0
    */
   public void invalidate(UUID player) {
     languageSelectionMap.remove(player);
@@ -39,6 +41,7 @@ public class PlayerLanguageRepository {
    *
    * @param player The player
    * @return The chosen language
+   * @since 1.0.0
    */
   public String get(UUID player) {
     // Return english as default language if no specific setting has been made

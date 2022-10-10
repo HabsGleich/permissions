@@ -121,6 +121,7 @@ public class PermissionGroupRepository {
    *
    * @param name The name
    * @return Contained or not
+   * @since 1.0.0
    */
   public boolean hasGroup(String name) {
     return cachedGroups.containsKey(name);

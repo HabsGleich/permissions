@@ -33,6 +33,7 @@ public class PermittedPlayerRepository {
    *
    * @param uuid The player uuid
    * @return The future permitted player
+   * @since 1.0.0
    */
   public CompletableFuture<PermittedPlayer> getPermittedPlayer(UUID uuid) {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
