@@ -28,14 +28,13 @@ public interface SignDriver {
   /**
    * Creates a new informative sign of a given player
    *
-   * @param playerId The player id
    * @param x The x position
    * @param y The y position
    * @param z The z position
    * @param world The world
    * @since 1.0.0
    */
-  void createSign(UUID playerId, int x, int y, int z, String world);
+  void createSign(int x, int y, int z, String world);
 
   /**
    * Deletes a given informative sign from the database

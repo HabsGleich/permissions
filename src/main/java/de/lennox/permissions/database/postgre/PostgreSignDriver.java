@@ -59,13 +59,12 @@ public class PostgreSignDriver implements SignDriver {
             // Construct the signs from query result
             List<InformativeSign> signs = new ArrayList<>();
             while (result.next()) {
-              UUID playerId = UUID.fromString(result.getString("player_id"));
               int x = result.getInt("x");
               int y = result.getInt("y");
               int z = result.getInt("z");
               String world = result.getString("world");
 
-              signs.add(new InformativeSign(playerId, x, y, z, world));
+              signs.add(new InformativeSign(x, y, z, world));
             }
             signFuture.complete(Optional.of(signs));
           } catch (SQLException e) {
@@ -81,7 +80,6 @@ public class PostgreSignDriver implements SignDriver {
   /**
    * Creates a new informative sign of a given player
    *
-   * @param playerId The player id
    * @param x The x position
    * @param y The y position
    * @param z The z position
@@ -89,12 +87,12 @@ public class PostgreSignDriver implements SignDriver {
    * @since 1.0.0
    */
   @Override
-  public void createSign(UUID playerId, int x, int y, int z, String world) {
+  public void createSign(int x, int y, int z, String world) {
     databaseThreadPool.execute(
         () ->
             StatementBuilder.forConnection(getConnection())
-                .withSql("INSERT INTO informative_signs VALUES(?, ?, ?, ?, ?)")
-                .withParameters(playerId.toString(), x, y, z, world)
+                .withSql("INSERT INTO informative_signs VALUES(?, ?, ?, ?)")
+                .withParameters(x, y, z, world)
                 .execute());
   }
 
@@ -110,9 +108,8 @@ public class PostgreSignDriver implements SignDriver {
         () ->
             StatementBuilder.forConnection(getConnection())
                 .withSql(
-                    "DELETE FROM informative_signs WHERE player_id = ? AND x = ? AND y = ? AND z = ? AND world = ?")
+                    "DELETE FROM informative_signs WHERE AND x = ? AND y = ? AND z = ? AND world = ?")
                 .withParameters(
-                    sign.getPlayerId().toString(),
                     sign.getX(),
                     sign.getY(),
                     sign.getZ(),

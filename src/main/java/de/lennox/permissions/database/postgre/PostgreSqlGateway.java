@@ -80,7 +80,6 @@ public class PostgreSqlGateway {
         .withSql(
             """
                CREATE TABLE IF NOT EXISTS informative_signs(
-                 player_id VARCHAR NOT NULL,
                  x INTEGER NOT NULL,
                  y INTEGER NOT NULL,
                  z INTEGER NOT NULL,
