@@ -3,11 +3,12 @@ package de.lennox.permissions.sign;
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.model.InformativeSign;
 import lombok.Getter;
+import org.bukkit.Location;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  */
 @Getter
 public class InformativeSignRepository {
-  private final Set<InformativeSign> cachedSigns = new HashSet<>();
+  private final Map<Integer, InformativeSign> cachedSigns = new HashMap<>();
 
   /**
    * Builds an initial cache with all currently in-database persistent signs
@@ -45,7 +46,15 @@ public class InformativeSignRepository {
               }
 
               List<InformativeSign> signs = optionalSigns.get();
-              cachedSigns.addAll(signs);
+              for (InformativeSign sign : signs) {
+                Optional<Location> optionalLocation = sign.getBlockLocation();
+
+                // Only add if location exists on startup
+                if (optionalLocation.isPresent()) {
+                  Location location = optionalLocation.get();
+                  cachedSigns.put(location.hashCode(), sign);
+                }
+              }
 
               logger.log(Level.INFO, "Cached " + signs.size() + " sign(s) on start-up!");
             });
@@ -58,7 +67,13 @@ public class InformativeSignRepository {
    * @since 1.0.0
    */
   public void register(InformativeSign sign) {
-    cachedSigns.add(sign);
+    Optional<Location> optionalLocation = sign.getBlockLocation();
+
+    // Only add if location exists
+    if (optionalLocation.isPresent()) {
+      Location location = optionalLocation.get();
+      cachedSigns.put(location.hashCode(), sign);
+    }
   }
 
   /**
@@ -68,6 +83,12 @@ public class InformativeSignRepository {
    * @since 1.0.0
    */
   public void invalidate(InformativeSign sign) {
-    cachedSigns.remove(sign);
+    Optional<Location> optionalLocation = sign.getBlockLocation();
+
+    // Can only be removed if location exists
+    if (optionalLocation.isPresent()) {
+      Location location = optionalLocation.get();
+      cachedSigns.remove(location.hashCode());
+    }
   }
 }

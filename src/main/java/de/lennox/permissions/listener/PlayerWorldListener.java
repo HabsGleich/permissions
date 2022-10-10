@@ -3,12 +3,12 @@ package de.lennox.permissions.listener;
 import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.model.InformativeSign;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.SignChangeEvent;
 
 import java.util.List;
 
@@ -22,20 +22,25 @@ import java.util.List;
 public class PlayerWorldListener implements Listener {
 
   @EventHandler
-  public void onBlockPlace(BlockPlaceEvent event) {
-    Player player = event.getPlayer();
+  public void onSignChange(SignChangeEvent event) {
     Block block = event.getBlock();
 
-    // Only register sign places
-    if (block.getType().name().endsWith("_SIGN")) {
-      PlayerPermissionPlugin.getSingleton()
-          .getSignRepository()
-          .register(
-              new InformativeSign(
-                  block.getX(),
-                  block.getY(),
-                  block.getZ(),
-                  block.getWorld().getName()));
+    List<Component> lines = event.lines();
+    String firstLine = PlainTextComponentSerializer.plainText().serialize(lines.get(0));
+    // Only modify signs with %showRank% in first line
+    if (!firstLine.contains("%showRank%")) {
+      return;
     }
+
+    PlayerPermissionPlugin.getSingleton()
+        .getSignRepository()
+        .register(
+            new InformativeSign(
+                block.getX(), block.getY(), block.getZ(), block.getWorld().getName()));
+  }
+
+  @EventHandler
+  public void onBlockBreak(BlockBreakEvent event) {
+    Block block = event.getBlock();
   }
 }

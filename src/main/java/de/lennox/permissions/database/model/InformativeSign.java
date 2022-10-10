@@ -8,13 +8,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Contains data about an informative sign which shows info about a players rank
@@ -45,13 +42,16 @@ public class InformativeSign {
   public List<Component> getSignComponents(
       PermittedPlayer player, Player bukkitPlayer, String locale) {
     LocalizationRepository localization = PlayerPermissionPlugin.getSingleton().getLocalization();
+    String groupName = player.getGroup().isEmpty() ? "Default" : player.getGroup();
+
     return List.of(
         Component.text(bukkitPlayer.getName(), NamedTextColor.GRAY),
         Component.text(
-            String.format("%s: %s", localization.getMessage(locale, "group"), player.getGroup()),
+            String.format("%s: %s", localization.getMessage(locale, "group"), groupName),
             NamedTextColor.AQUA),
-        Component.text(localization.getMessage(locale, "expires_at"), NamedTextColor.GRAY),
-        Component.text(player.parseExpiryDate(), NamedTextColor.AQUA));
+        Component.text(localization.getMessage(locale, "expires_at"), NamedTextColor.AQUA),
+        Component.text(
+            player.getExpiresAt() != -1 ? player.parseExpiryDate() : "Never", NamedTextColor.AQUA));
   }
 
   /**

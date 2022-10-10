@@ -41,10 +41,11 @@ public class AutomaticSignTextUpdater {
     permissions
         .getSignRepository()
         .getCachedSigns()
+        .values()
         .forEach(
             sign -> {
               Optional<Location> optionalLocation = sign.getBlockLocation();
-              // Don't do anything if location could not created
+              // Don't do anything if location could not be created
               if (optionalLocation.isEmpty()) {
                 return;
               }
@@ -62,7 +63,6 @@ public class AutomaticSignTextUpdater {
 
                 PermittedPlayer permittedPlayer = optionalPermittedPlayer.get();
                 String locale = permissions.getPlayerLanguageRepository().get(player.getUniqueId());
-
                 player.sendSignChange(
                     location, sign.getSignComponents(permittedPlayer, player, locale));
               }
