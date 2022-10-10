@@ -1,4 +1,4 @@
-package de.lennox.permissions.database.postgre;
+package de.lennox.permissions.database.postgres;
 
 import lombok.Builder;
 import lombok.Data;

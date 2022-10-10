@@ -1,4 +1,4 @@
-package de.lennox.permissions.database.postgre;
+package de.lennox.permissions.database.postgres;
 
 import de.lennox.permissions.database.PermissionDriver;
 import de.lennox.permissions.database.builder.StatementBuilder;
@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
  */
 @Getter
 @RequiredArgsConstructor
-public class PostgrePermissionDriver implements PermissionDriver {
+public class PostgreSqlPermissionDriver implements PermissionDriver {
   private final ExecutorService databaseThreadPool = Executors.newCachedThreadPool();
   private final PostgreSqlGateway gateway;
 
