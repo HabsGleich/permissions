@@ -23,6 +23,12 @@ import java.util.function.Consumer;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 
+/**
+ * The /perms brigadier command implementation
+ *
+ * @since 1.0.0
+ * @author Lennox
+ */
 public class PermsBrigadierCommand extends Command {
   public PermsBrigadierCommand() {
     super("perms");
@@ -176,7 +182,6 @@ public class PermsBrigadierCommand extends Command {
                       .getPermittedPlayer(playerId)
                       .whenComplete(
                           (permittedPlayer, throwable) -> {
-                            playerRepository.updatePlayerGroupCache(uuid, groupName);
                             permittedPlayer.setGroup(groupName);
                             permittedPlayer.setExpiresAt(time);
                           });

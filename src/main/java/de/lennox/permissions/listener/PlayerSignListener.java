@@ -14,8 +14,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import java.util.List;
 
 /**
- * Listens to all block placements and block breaks a player makes to create / remove informative
- * signs
+ * Listens to all sign changes and block breaks a player makes to create / remove informative signs
  *
  * @since 1.0.0
  * @author Lennox

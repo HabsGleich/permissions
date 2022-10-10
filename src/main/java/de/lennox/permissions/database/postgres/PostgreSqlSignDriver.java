@@ -108,11 +108,7 @@ public class PostgreSqlSignDriver implements SignDriver {
             StatementBuilder.forConnection(getConnection())
                 .withSql(
                     "DELETE FROM informative_signs WHERE x = ? AND y = ? AND z = ? AND world = ?")
-                .withParameters(
-                    sign.getX(),
-                    sign.getY(),
-                    sign.getZ(),
-                    sign.getWorld())
+                .withParameters(sign.getX(), sign.getY(), sign.getZ(), sign.getWorld())
                 .execute());
   }
 

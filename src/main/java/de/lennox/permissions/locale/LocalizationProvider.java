@@ -32,16 +32,20 @@ public class LocalizationProvider {
    *
    * @param key Message key
    * @return The localized message
+   * @since 1.0.0
    */
   public String getMessage(String key) {
     return this.bundle.getString(key);
   }
 
   /**
-   * Creates a new message localization for the given locale
+   * Creates a new message localization for the given locale, uses a custom class loader to load
+   * resource bundles from a folder instead of the jarfile directly
    *
    * @param locale The locale
+   * @param loader The class loader
    * @return The message localization
+   * @since 1.0.0
    */
   public static LocalizationProvider of(Locale locale, ClassLoader loader) {
     LocalizationProvider provider = new LocalizationProvider(loader, locale);

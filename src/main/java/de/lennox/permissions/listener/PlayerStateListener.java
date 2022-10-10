@@ -18,6 +18,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Listens to player login, join and quit to create and invalidate caches.
+ *
+ * <p>It additionally modifies the join message to append the prefix of the player.
+ *
+ * @since 1.0.0
+ * @author Lennox
+ */
 public class PlayerStateListener implements Listener {
   private final PermissibleBaseInjector injector = new PermissibleBaseInjector();
 
@@ -25,15 +33,12 @@ public class PlayerStateListener implements Listener {
   private void onPlayerLogin(AsyncPlayerPreLoginEvent event) {
     PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     UUID player = event.getUniqueId();
-
-    // Let the player wait until his data is loaded
     PermittedPlayer permittedPlayer =
         permissions.getPlayerRepository().getPermittedPlayer(player).join();
 
     // Automatically assign player to default group on rank expire
     if (permittedPlayer.isRankExpired()) {
       permissions.getPermissionDriver().updatePlayerGroup(player, "", -1);
-      permissions.getPlayerRepository().updatePlayerGroupCache(player, "");
       permittedPlayer.setGroup("");
       permittedPlayer.setExpiresAt(-1);
     }
@@ -81,7 +86,6 @@ public class PlayerStateListener implements Listener {
   @EventHandler
   private void onPlayerQuit(PlayerQuitEvent event) {
     UUID uuid = event.getPlayer().getUniqueId();
-    PlayerPermissionPlugin.getSingleton().getPlayerRepository().invalidate(uuid);
     PlayerPermissionPlugin.getSingleton().getPlayerLanguageRepository().invalidate(uuid);
   }
 }

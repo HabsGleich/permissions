@@ -42,7 +42,6 @@ public class AutomaticRankAssigner {
         UUID uuid = permittedPlayer.getUuid();
 
         permissions.getPermissionDriver().updatePlayerGroup(uuid, "", -1);
-        permissions.getPlayerRepository().updatePlayerGroupCache(uuid, "");
         permittedPlayer.setGroup("");
         permittedPlayer.setExpiresAt(-1);
       }

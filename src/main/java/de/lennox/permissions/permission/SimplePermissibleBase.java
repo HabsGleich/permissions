@@ -55,6 +55,7 @@ public class SimplePermissibleBase extends PermissibleBase {
    *
    * @param name The permission
    * @return The permission state
+   * @since 1.0.0
    */
   private boolean hasPermission0(String name) {
     UUID uuid = player.getUniqueId();
@@ -79,6 +80,7 @@ public class SimplePermissibleBase extends PermissibleBase {
    * @param name The permission
    * @param onlyIntern Defines if only group permissions should be checked, not the fallback
    * @return The set status
+   * @since 1.0.0
    */
   private boolean isPermissionSet0(String name, boolean onlyIntern) {
     UUID uuid = player.getUniqueId();

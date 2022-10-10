@@ -33,8 +33,9 @@ public class InformativeSignRepository {
    * @since 1.0.0
    */
   public void buildInitialCache() {
-    Logger logger = PlayerPermissionPlugin.getSingleton().getLogger();
-    PlayerPermissionPlugin.getSingleton()
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
+    Logger logger = permissions.getLogger();
+    permissions
         .getSignDriver()
         .queryAllSigns()
         .whenCompleteAsync(

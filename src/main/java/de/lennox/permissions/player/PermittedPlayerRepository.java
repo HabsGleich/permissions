@@ -25,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public class PermittedPlayerRepository {
   private final Map<UUID, PermittedPlayer> cachedPlayers = new HashMap<>();
-  private final Map<UUID, String> playerGroups = new HashMap<>();
 
   /**
    * Gets a permitted player by the players uuid from cache or database.
@@ -36,11 +35,12 @@ public class PermittedPlayerRepository {
    * @return The future permitted player
    */
   public CompletableFuture<PermittedPlayer> getPermittedPlayer(UUID uuid) {
+    PlayerPermissionPlugin permissions = PlayerPermissionPlugin.getSingleton();
     CompletableFuture<PermittedPlayer> playerFuture = new CompletableFuture<>();
     if (cachedPlayers.containsKey(uuid)) {
       playerFuture.complete(cachedPlayers.get(uuid));
     } else {
-      PlayerPermissionPlugin.getSingleton()
+      permissions
           .getPermissionDriver()
           .queryPlayerById(uuid)
           .whenCompleteAsync(
@@ -48,19 +48,14 @@ public class PermittedPlayerRepository {
                 // Create new player if there is none in the database
                 if (optionalPlayer.isEmpty()) {
                   PermittedPlayer player =
-                      PlayerPermissionPlugin.getSingleton()
-                          .getPermissionDriver()
-                          .createPermittedPlayer(uuid)
-                          .join();
+                      permissions.getPermissionDriver().createPermittedPlayer(uuid).join();
                   cachedPlayers.put(uuid, player);
-                  playerGroups.put(uuid, "");
                   playerFuture.complete(player);
                   return;
                 }
 
                 PermittedPlayer permittedPlayer = optionalPlayer.get();
                 cachedPlayers.put(uuid, permittedPlayer);
-                playerGroups.put(uuid, permittedPlayer.getGroup());
                 playerFuture.complete(permittedPlayer);
               });
     }
@@ -73,28 +68,9 @@ public class PermittedPlayerRepository {
    *
    * @param uuid The player uuid
    * @return The optional permitted player
+   * @since 1.0.0
    */
   public Optional<PermittedPlayer> getPermittedPlayerNoQuery(UUID uuid) {
     return Optional.ofNullable(cachedPlayers.get(uuid));
-  }
-
-  /**
-   * Updates the cached group of a player
-   *
-   * @param uuid The player uuid
-   * @param group The new group
-   */
-  public void updatePlayerGroupCache(UUID uuid, String group) {
-    playerGroups.put(uuid, group);
-  }
-
-  /**
-   * Removes a permitted player from the cache
-   *
-   * @param uuid The uuid
-   */
-  public void invalidate(UUID uuid) {
-    cachedPlayers.remove(uuid);
-    playerGroups.remove(uuid);
   }
 }

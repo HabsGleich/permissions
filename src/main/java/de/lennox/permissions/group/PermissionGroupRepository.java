@@ -99,6 +99,7 @@ public class PermissionGroupRepository {
    *
    * @param name The group name
    * @return The optional group
+   * @since 1.0.0
    */
   public Optional<PermissionGroup> getGroupNoQuery(String name) {
     return Optional.ofNullable(cachedGroups.get(name));

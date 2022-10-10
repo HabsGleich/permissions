@@ -12,6 +12,12 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+/**
+ * The /rank brigadier command implementation
+ *
+ * @since 1.0.0
+ * @author Lennox
+ */
 public class RankBrigadierCommand extends Command {
   public RankBrigadierCommand() {
     super("rank");

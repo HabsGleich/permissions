@@ -3,6 +3,12 @@ package de.lennox.permissions.database.postgres;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * PostgreSQL authentication data class
+ *
+ * @since 1.0.0
+ * @author Lennox
+ */
 @Data
 @Builder
 public class PostgreSqlConfiguration {

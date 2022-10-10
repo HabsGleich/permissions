@@ -1,16 +1,12 @@
 package de.lennox.permissions.sign;
 
 import de.lennox.permissions.PlayerPermissionPlugin;
-import de.lennox.permissions.database.model.InformativeSign;
 import de.lennox.permissions.database.model.PermittedPlayer;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Automatic updates for all informative signs on the world
@@ -32,7 +28,7 @@ public class AutomaticSignTextUpdater {
   }
 
   /**
-   * Updates all informative signs in the world
+   * Updates all informative signs registered in the cache repository
    *
    * @since 1.0.0
    */

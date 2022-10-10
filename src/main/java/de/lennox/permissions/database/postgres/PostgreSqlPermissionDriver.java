@@ -1,5 +1,6 @@
 package de.lennox.permissions.database.postgres;
 
+import de.lennox.permissions.PlayerPermissionPlugin;
 import de.lennox.permissions.database.PermissionDriver;
 import de.lennox.permissions.database.builder.StatementBuilder;
 import de.lennox.permissions.database.model.PermissionGroup;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 /**
  * Handles all database queries, updates and deletions
@@ -69,9 +71,9 @@ public class PostgreSqlPermissionDriver implements PermissionDriver {
 
             playerFuture.complete(Optional.of(new PermittedPlayer(uuid, rank, expirationDate)));
           } catch (SQLException e) {
-            System.err.println(
-                "Failed to read player query result! For precise details see the stacktrace below.");
-            e.printStackTrace();
+            PlayerPermissionPlugin.getSingleton()
+                .getLogger()
+                .log(Level.SEVERE, "Failed to read player query result!", e);
             // Complete with empty player on failure
             playerFuture.complete(Optional.empty());
           }
@@ -126,9 +128,9 @@ public class PostgreSqlPermissionDriver implements PermissionDriver {
             }
             groupListFuture.complete(Optional.of(groups));
           } catch (SQLException e) {
-            System.err.println(
-                "Failed to read query result! For precise details read stacktrace below.");
-            e.printStackTrace();
+            PlayerPermissionPlugin.getSingleton()
+                .getLogger()
+                .log(Level.SEVERE, "Failed to read query result!");
             groupListFuture.complete(Optional.empty());
           }
         });
@@ -195,9 +197,9 @@ public class PostgreSqlPermissionDriver implements PermissionDriver {
                                   permissions.getB())));
                     });
           } catch (SQLException e) {
-            System.err.println(
-                "Failed to read query result! For precise details read stacktrace below.");
-            e.printStackTrace();
+            PlayerPermissionPlugin.getSingleton()
+                .getLogger()
+                .log(Level.SEVERE, "Failed to read query result!", e);
             groupFuture.complete(Optional.empty());
           }
         });
@@ -253,9 +255,9 @@ public class PostgreSqlPermissionDriver implements PermissionDriver {
 
             permissionFuture.complete(Optional.of(new Tuple<>(allowed, denied)));
           } catch (SQLException e) {
-            System.err.println(
-                "Failed to read query result! For precise details read stacktrace below.");
-            e.printStackTrace();
+            PlayerPermissionPlugin.getSingleton()
+                .getLogger()
+                .log(Level.SEVERE, "Failed to read query result!", e);
             permissionFuture.complete(Optional.empty());
           }
         });

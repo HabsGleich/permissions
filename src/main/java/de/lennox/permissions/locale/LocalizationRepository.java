@@ -62,8 +62,7 @@ public class LocalizationRepository {
         new URLClassLoader(new URL[] {languageBundleFolder.toURI().toURL()});
     for (String language : languages) {
       localeCache.put(
-          language,
-          LocalizationProvider.of(Locale.forLanguageTag(language), languageBundleLoader));
+          language, LocalizationProvider.of(Locale.forLanguageTag(language), languageBundleLoader));
     }
   }
 

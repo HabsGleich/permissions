@@ -1,6 +1,7 @@
 package de.lennox.permissions.database.builder;
 
 import com.google.common.base.Preconditions;
+import de.lennox.permissions.PlayerPermissionPlugin;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Builder for easy creation and execution of jdbc connection statements
@@ -90,9 +92,9 @@ public class StatementBuilder {
       // Execute the statement
       return statement.execute();
     } catch (SQLException e) {
-      System.err.println(
-          "Failed to create new jdbc statement! View the stacktrace below for more details.");
-      e.printStackTrace();
+      PlayerPermissionPlugin.getSingleton()
+          .getLogger()
+          .log(Level.SEVERE, "Failed to create new jdbc statement!", e);
       return false;
     }
   }
@@ -115,9 +117,9 @@ public class StatementBuilder {
       // Execute the statement
       return Optional.of(statement.executeQuery());
     } catch (SQLException e) {
-      System.err.println(
-          "Failed to create new jdbc query statement! View the stacktrace below for more details.");
-      e.printStackTrace();
+      PlayerPermissionPlugin.getSingleton()
+          .getLogger()
+          .log(Level.SEVERE, "Failed to create new jdbc query statement!", e);
       return Optional.empty();
     }
   }
